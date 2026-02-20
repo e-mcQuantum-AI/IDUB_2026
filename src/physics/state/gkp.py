@@ -1,6 +1,6 @@
 import numpy as np
 from qutip import displace, basis
-from base import QuantumState
+from .base import QuantumState
 
 class GKPState(QuantumState):
 

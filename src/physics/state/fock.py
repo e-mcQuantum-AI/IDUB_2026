@@ -1,5 +1,5 @@
 from qutip import basis
-from base import QuantumState
+from .base import QuantumState
 
 class FockState(QuantumState):
 
