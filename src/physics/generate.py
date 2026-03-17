@@ -1,65 +1,61 @@
 import os
-import matplotlib.pyplot as plt
 import numpy as np
-from qutip import qeye, wigner, destroy, fock_dm
+import matplotlib.pyplot as plt
+from qutip import fock, coherent, wigner, ket2dm
 
-class State_Database_Generator:
-    def __init__(self, cutoff: int, N: int, root_dir: str = "data"):
-        self.cutoff = cutoff
-        self.N = N
-        self.root_dir = root_dir
-        self.rng = np.random.default_rng()
-        self.identity = qeye(self.cutoff) / self.cutoff
-        self.a = destroy(self.cutoff)
-        
-        os.makedirs(self.root_dir, exist_ok=True)
+def setup_folders():
+    base_path = "quantum_dataset"
+    folders = ["clean", "noisy"]
+    paths = {}
+    for f in folders:
+        path = os.path.join(base_path, f)
+        if not os.path.exists(path):
+            os.makedirs(path)
+        paths[f] = path
+    return paths
 
-    def apply_noise(self, rho, noise_type, strength):
-        if noise_type == "depolarization":
-            # Obecne mieszanie macierzy gęstości z identycznością
-            return (1 - strength) * rho + (strength * self.identity / self.cutoff)
-            
-        elif noise_type == "photon_loss":
-            # Uproszczony model utraty fotonów (kanał tłumiący)
-            # Dla potrzeb ML: przesuwamy stan w stronę próżni
-            vacuum = fock_dm(self.cutoff, 0)
-            return (1 - strength) * rho + (strength * vacuum)
-            
-        elif noise_type == "gaussian":
-            # Dodanie losowego przesunięcia (displacement) w przestrzeni fazowej
-            alpha = (self.rng.standard_normal() + 1j * self.rng.standard_normal()) * strength
-            D = (alpha * self.a.dag() - np.conj(alpha) * self.a).expm()
-            return D * rho * D.dag()
-            
-        return rho
+def generate_noisy_dataset(n_samples=10, resolution=100, noise_level=0.2):
+    paths = setup_folders()
+    N = 32
+    xvec = np.linspace(-5, 5, resolution)
     
-    def generate(self, state_class, noise_type, **state_kwargs):
-        save_path = os.path.join(self.root_dir, state_class.__name__)
-        os.makedirs(save_path, exist_ok=True)
+    print(f"Generowanie {n_samples * 2} par stanów (czysty vs zaszumiony)...")
 
-        # identyfikacja stanu który chcemy generować
-        quantum_state = state_class(cutoff=self.cutoff, **state_kwargs)
-        rho = quantum_state.density_matrix()
+    for i in range(n_samples):
+        # --- 1. STAN FOCKA ---
+        n_photons = np.random.randint(0, 8)
+        state_fock = fock(N, n_photons)
+        
+        # Czysty
+        w_clean = wigner(state_fock, xvec, xvec)
+        plt.imsave(os.path.join(paths["clean"], f"fock_n{n_photons}_id{i}.png"), w_clean, cmap='RdBu_r')
 
-        print(f"Generujemy {self.N} plików dla {state_class.__name__}...")
+        # --- 2. STAN KOTA ---
+        alpha = np.random.uniform(1.5, 3.5)
+        state_cat = (coherent(N, alpha) + coherent(N, -alpha)).unit()
+        
+        # Czysty
+        w_cat_clean = wigner(state_cat, xvec, xvec)
+        plt.imsave(os.path.join(paths["clean"], f"cat_a{alpha:.2f}_id{i}.png"), w_cat_clean, cmap='RdBu_r')     
 
-        # pętla generująca N stanów
-        for i in range(self.N):
-            p = self.rng.uniform(0, 0.3)
-            rho_noise = self.apply_noise(rho, noise_type, p)
+        # --- 3. STAN BINOMIALNY ---
+        n = np.random.randint(0, 8)
+        p = np.random.uniform(0.1, 0.9)
+        state_binomial = (fock(N, n) + p * fock(N, n+1)).unit()
 
-            xvec = np.linspace(-5, 5, 200)
-            W = wigner(rho_noise, xvec, xvec) # wigner, bardzo ważny
+        # Czysty
+        w_binomial_clean = wigner(state_binomial, xvec, xvec)
+        plt.imsave(os.path.join(paths["clean"], f"binomial_n{n}_p{p:.2f}_id{i}.png"), w_binomial_clean, cmap='RdBu_r')
 
-            fig = plt.figure(figsize=(1.28, 1.28), dpi=100)
-            ax = fig.add_axes([0, 0, 1, 1]) # Obraz zajmuje całe pole, bez marginesów
-            
-            # wizualizacja funkcji Wignera
-            ax.imshow(W, cmap='RdBu', extent=[-5, 5, -5, 5], origin="lower")
-            
-            # Usuń śmieci 
-            ax.axis('off')
-            
-            # zapis
-            file_name = f"{state_class.__name__}_ID{i:04d}_p{p:.4f}.png"
-            plt.savefig(os.path.join(save_path, file_name), format='png')
+        # --- 4. STAN KOHERENTNY ---
+        alpha = np.random.uniform(1.5, 3.5)
+        state_coherent = coherent(N, alpha)
+
+        # Czysty
+        w_coherent_clean = wigner(state_coherent, xvec, xvec)
+        plt.imsave(os.path.join(paths["clean"], f"coherent_a{alpha:.2f}_id{i}.png"), w_coherent_clean, cmap='RdBu_r')
+
+    print("Gotowe! Dane zapisano w folderze quantum_dataset/")
+
+# Uruchomienie z 20% stratą fotonów
+generate_noisy_dataset(n_samples=5, noise_level=0.2)

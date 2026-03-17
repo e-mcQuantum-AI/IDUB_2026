@@ -7,5 +7,5 @@
 __pycache__/
 *.py[cod]
 *$py.class
-
-data/
+/quantum_dataset/*
+data/*
