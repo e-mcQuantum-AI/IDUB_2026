@@ -58,4 +58,5 @@ def generate_noisy_dataset(n_samples=10, resolution=100, noise_level=0.2):
     print("Gotowe! Dane zapisano w folderze quantum_dataset/")
 
 # Uruchomienie z 20% stratą fotonów
-generate_noisy_dataset(n_samples=5, noise_level=0.2)
+if __name__ == '__main__':
+    generate_noisy_dataset(n_samples=5, noise_level=0.2)
