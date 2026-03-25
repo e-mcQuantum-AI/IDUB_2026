@@ -14,12 +14,12 @@ def setup_folders():
         paths[f] = path
     return paths
 
-def generate_noisy_dataset(n_samples=10, resolution=100, noise_level=0.2):
+def generate_dataset(n_samples=10, resolution=100):
     paths = setup_folders()
     N = 32
     xvec = np.linspace(-5, 5, resolution)
     
-    print(f"Generowanie {n_samples * 2} par stanów (czysty vs zaszumiony)...")
+    print(f"Generowanie {n_samples} par stanów...")
 
     for i in range(n_samples):
         # --- 1. STAN FOCKA ---
@@ -55,7 +55,6 @@ def generate_noisy_dataset(n_samples=10, resolution=100, noise_level=0.2):
         w_coherent_clean = wigner(state_coherent, xvec, xvec)
         plt.imsave(os.path.join(paths["clean"], f"coherent_a{alpha:.2f}_id{i}.png"), w_coherent_clean, cmap='RdBu_r')
 
-    print("Gotowe! Dane zapisano w folderze quantum_dataset/")
+    print("Dane zapisano w folderze quantum_dataset/")
 
-# Uruchomienie z 20% stratą fotonów
-generate_noisy_dataset(n_samples=5, noise_level=0.2)
+generate_dataset(n_samples=5)
