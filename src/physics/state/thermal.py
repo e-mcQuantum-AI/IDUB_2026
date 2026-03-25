@@ -1,6 +1,6 @@
 from qutip import thermal_dm
 from qutip import Qobj
-from base import QuantumState
+from .base import QuantumState
 
 class ThermalState(QuantumState):
 

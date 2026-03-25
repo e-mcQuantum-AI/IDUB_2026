@@ -1,5 +1,5 @@
 from qutip import coherent
-from base import QuantumState
+from .base import QuantumState
 
 class CatState(QuantumState):
 
