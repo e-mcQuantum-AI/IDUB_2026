@@ -5,7 +5,7 @@ from qutip import fock, coherent, wigner, ket2dm
 
 def setup_folders():
     base_path = "quantum_dataset"
-    folders = ["clean", "noisy"]
+    folders = ["clean"]
     paths = {}
     for f in folders:
         path = os.path.join(base_path, f)
