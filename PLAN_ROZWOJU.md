@@ -20,12 +20,10 @@
 | cGAN z warstwami kwantowymi | **0%** | Pełna implementacja z niestandardowymi warstwami |
 | Warstwy macierzy gęstości (hermitowska, ślad=1) | **0%** | Implementacja jako custom layers PyTorch/TF |
 | Porównanie z MLE i APG | **0%** | Implementacja metod klasycznych |
-| Porównanie z podejściem wielokopijnym Bartkiewicza | **0%** | Implementacja lub adaptacja kodu |
-| Grad-CAM | **0%** | Implementacja dla CNN |
-| Analiza robustności na szum | **0%** | Systematyczne eksperymenty |
+| Analiza odporności na szum | **0%** | Systematyczne eksperymenty |
 | Testy automatyczne | **0%** | pytest, testy stanów/kanałów/pipeline/ML |
 | Dokumentacja kodu | **10%** | Docstringi, README, tutoriale |
-| Narzędzia wizualizacyjne | **5%** — tylko zapis PNG | Interaktywne wykresy Wignera, macierzy gęstości, Grad-CAM |
+| Narzędzia wizualizacyjne | **5%** — tylko zapis PNG | Interaktywne wykresy Wignera, macierzy gęstości |
 | Publikacja naukowa | **0%** | Tekst, wykresy, analiza |
 
 ---
@@ -63,7 +61,7 @@ Realizacja zadań z raportów audytu (`raport.tex`, `raport_quantum_statesDB.tex
 Doprowadzenie warstwy fizycznej do kompletności wymaganej przez cele projektu.
 
 ### 1.1 Nowe kanały szumu
-Projekt wymaga badania robustności na „straty fotonów, szum gaussowski, mieszanie stanów". Obecne 2 kanały to za mało.
+Projekt wymaga badania odporności na „straty fotonów, szum gaussowski, mieszanie stanów". Obecne 2 kanały to za mało.
 
 - [ ] **DephasingChannel** — operator kolapsu: √γ·n̂ (utrata fazy bez utraty fotonów)
 - [ ] **DepolarizingChannel** — ρ → (1-p)ρ + p·I/d (całkowita utrata informacji z prawdopodobieństwem p)
@@ -157,8 +155,8 @@ src/ml/
 ├── models/
 │   ├── __init__.py
 │   ├── classifier.py      — CNN klasyfikator
-│   ├── layers.py           — niestandardowe warstwy
-│   └── grad_cam.py         — Grad-CAM
+│   ├── layers.py           — niestandardowe warstwy kwantowe
+│   └── reconstructor.py    — cGAN rekonstruktor
 ├── training/
 │   ├── __init__.py
 │   ├── trainer.py          — pętla treningowa
@@ -167,12 +165,12 @@ src/ml/
 ├── evaluation/
 │   ├── __init__.py
 │   ├── evaluator.py        — ewaluacja modelu
-│   └── noise_robustness.py — analiza robustności
+│   └── noise_analysis.py   — analiza odporności na szum
 └── visualization/
     ├── __init__.py
     ├── wigner_plot.py       — wizualizacja Wignera/Husimi
     ├── training_plot.py     — krzywe uczenia
-    └── cam_plot.py          — wizualizacja Grad-CAM
+    └── comparison_plot.py   — wykresy porównawcze metod
 ```
 
 - [ ] **Klasyfikator CNN** (`models/classifier.py`):
@@ -200,15 +198,7 @@ src/ml/
 - [ ] Precision, recall, F1-score per klasa
 - [ ] Accuracy ogólna i per-class
 
-### 3.4 Grad-CAM
-Cel projektu: „Interpretacja decyzji sieci metodą Grad-CAM w celu optymalizacji strategii pomiarowych".
-
-- [ ] Implementacja Grad-CAM dla ostatniej warstwy konwolucyjnej
-- [ ] Wizualizacja: nałożenie mapy aktywacji na obraz Wignera/Husimi
-- [ ] Analiza: które regiony przestrzeni fazowej są decyzyjne dla każdej klasy
-- [ ] Wnioski: jakie pomiary (zakres q, p) są najważniejsze dla rozróżnienia stanów
-
-### 3.5 Analiza robustności na szum
+### 3.4 Analiza odporności na szum
 Cel projektu: „Badanie odporności na różne typy szumu eksperymentalnego".
 
 - [ ] Trenowanie na czystych danych → testowanie na zaszumionych (różne γ)
@@ -217,7 +207,7 @@ Cel projektu: „Badanie odporności na różne typy szumu eksperymentalnego".
 - [ ] Wykresy: accuracy vs typ stanu × typ szumu (heatmapa)
 - [ ] Analiza: które stany są najtrudniejsze do sklasyfikowania przy szumie
 
-**Kryterium**: Accuracy > 95% na czystych danych, > 85% przy umiarkowanym szumie (γ=0.1). Kompletna analiza Grad-CAM dla wszystkich 7 klas.
+**Kryterium**: Accuracy > 95% na czystych danych, > 85% przy umiarkowanym szumie (γ=0.1).
 
 ---
 
@@ -295,17 +285,13 @@ Cel projektu: „Analiza porównawcza z klasycznymi metodami estymacji".
 - [ ] Szybsza konwergencja niż MLE (metoda Nesterowa)
 - [ ] Projekcja na zbiór macierzy gęstości
 
-### 5.3 Podejście wielokopijne (Bartkiewicz et al.)
-- [ ] Implementacja lub adaptacja metody z arXiv:2411.05745
-- [ ] Porównanie: redukcja wymagań pomiarowych
-
-### 5.4 Framework porównawczy
+### 5.3 Framework porównawczy
 - [ ] `src/ml/evaluation/benchmark.py`
 - [ ] Wspólne metryki: wierność, trace distance, czas
 - [ ] Wspólne dane testowe: te same stany, te same poziomy szumu
 - [ ] Tabele i wykresy porównawcze
 
-**Kryterium**: Tabela porównawcza CNN/cGAN vs MLE vs APG vs multicopy dla wszystkich 7 stanów × 5 poziomów szumu.
+**Kryterium**: Tabela porównawcza CNN/cGAN vs MLE vs APG dla wszystkich 7 stanów × 5 poziomów szumu.
 
 ---
 
@@ -316,16 +302,15 @@ Cel projektu: „Interaktywne narzędzia do analizy funkcji Wignera, macierzy g�
 ### 6.1 Moduł wizualizacji
 - [ ] `src/ml/visualization/wigner_plot.py` — wykresy Wignera i Husimi Q z matplotlib/plotly
 - [ ] `src/ml/visualization/density_matrix_plot.py` — wizualizacja macierzy gęstości (Hinton diagram, 3D bar)
-- [ ] `src/ml/visualization/cam_plot.py` — nakładanie Grad-CAM na Wignera
 - [ ] `src/ml/visualization/training_plot.py` — krzywe uczenia, loss, accuracy
 - [ ] `src/ml/visualization/comparison_plot.py` — wykresy porównawcze metod
 
 ### 6.2 Interaktywny notebook
 - [ ] Jupyter notebook z przykładami użycia wszystkich narzędzi
 - [ ] Widgety: wybór stanu, parametrów, szumu → natychmiastowa wizualizacja
-- [ ] Demo: klasyfikacja → Grad-CAM → interpretacja
+- [ ] Demo: generowanie stanu → klasyfikacja → rekonstrukcja → porównanie metod
 
-**Kryterium**: Notebook z demonstracją pełnego potoku: generowanie → klasyfikacja → Grad-CAM → rekonstrukcja → porównanie.
+**Kryterium**: Notebook z demonstracją pełnego potoku: generowanie → klasyfikacja → rekonstrukcja → porównanie.
 
 ---
 
@@ -334,7 +319,6 @@ Cel projektu: „Interaktywne narzędzia do analizy funkcji Wignera, macierzy g�
 ### 7.1 Eksperymenty klasyfikacyjne
 - [ ] Systematyczne eksperymenty: 7 stanów × 5 szumów × 5 poziomów γ × 2 pomiary (Wigner, Husimi)
 - [ ] Walidacja krzyżowa 5-fold na każdej konfiguracji
-- [ ] Analiza Grad-CAM per klasa × per szum
 
 ### 7.2 Eksperymenty rekonstrukcyjne
 - [ ] Rekonstrukcja 7 stanów czystych → wierność
@@ -345,7 +329,6 @@ Cel projektu: „Interaktywne narzędzia do analizy funkcji Wignera, macierzy g�
 ### 7.3 Analiza porównawcza
 - [ ] CNN vs MLE vs APG: czas i dokładność
 - [ ] cGAN vs MLE vs APG: wierność i czas
-- [ ] Nawiązanie do wyników Bartkiewicza (67% redukcja pomiarów)
 - [ ] Nawiązanie do wyników Ahmed et al. (98% accuracy, F>0.99)
 
 ### 7.4 Wyniki do publikacji
@@ -394,7 +377,7 @@ Etap 8:                                                ████████�
 
 | Osoba | Główne odpowiedzialności | Etapy |
 |---|---|---|
-| **Osoba 1** | Architektura CNN, trening, Grad-CAM | 3, 7.1 |
+| **Osoba 1** | Architektura CNN, trening, analiza odporności | 3, 7.1 |
 | **Osoba 2** | Architektura cGAN, warstwy kwantowe | 4, 7.2 |
 | **Osoba 3** | Generator danych, augmentacja, baseline MLE/APG | 2, 5, 7.3 |
 | **Osoba 4** | Wizualizacja, testy, dokumentacja, eksperymenty | 1, 6, 7.4, 8 |
@@ -407,10 +390,10 @@ Etap 8:                                                ████████�
 | 0. Naprawy | 10 | 1 |
 | 1. Fizyka | 25 | 2 |
 | 2. Dane | 20 | 1–2 |
-| 3. CNN + Grad-CAM | 50 | 2 |
+| 3. CNN | 40 | 2 |
 | 4. cGAN | 60 | 2 |
-| 5. Baseline | 25 | 1 |
+| 5. Baseline | 20 | 1 |
 | 6. Wizualizacja | 15 | 1 |
-| 7. Eksperymenty | 40 | 4 |
+| 7. Eksperymenty | 35 | 4 |
 | 8. Dokumentacja | 30 | 4 |
-| **Łącznie** | **~275 godzin** | |
+| **Łącznie** | **~255 godzin** | |
