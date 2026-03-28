@@ -1,0 +1,435 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[polish]{babel}
+\usepackage[margin=2.5cm, headheight=14.5pt]{geometry}
+\usepackage{setspace}\onehalfspacing
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{csquotes}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{braket}
+\usepackage{listings}
+\usepackage{tcolorbox}
+\tcbuselibrary{breakable, skins}
+\usepackage[colorlinks=true, linkcolor=blue!70!black, citecolor=blue!70!black, urlcolor=blue!60!black]{hyperref}
+\usepackage[backend=biber, style=numeric, sorting=none]{biblatex}
+\addbibresource{raport.bib}
+
+\usepackage{fancyhdr}
+\pagestyle{fancy}\fancyhf{}
+\fancyhead[L]{\small\textit{IDUB\_2026 --- Audyt gałęzi quantum\_statesDB}}
+\fancyhead[R]{\small\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+\definecolor{codebg}{RGB}{248,248,248}
+\definecolor{codegreen}{RGB}{40,160,40}
+\definecolor{codegray}{RGB}{128,128,128}
+\definecolor{codeblue}{RGB}{0,80,180}
+
+\lstdefinestyle{python}{
+    language=Python,
+    backgroundcolor=\color{codebg},
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{codeblue}\bfseries,
+    stringstyle=\color{codegreen},
+    commentstyle=\color{codegray}\itshape,
+    numberstyle=\tiny\color{codegray},
+    numbers=left, numbersep=8pt,
+    frame=single, framerule=0.4pt, rulecolor=\color{codegray!50},
+    breaklines=true, showstringspaces=false, tabsize=4,
+    captionpos=b, aboveskip=10pt, belowskip=10pt,
+    morekeywords={self, True, False, None, as, assert, with, lambda},
+    literate=
+        {ą}{{\k{a}}}1 {ć}{{\'c}}1 {ę}{{\k{e}}}1 {ł}{{\l{}}}1
+        {ń}{{\'n}}1 {ó}{{\'o}}1 {ś}{{\'s}}1 {ź}{{\'z}}1 {ż}{{\.z}}1
+        {Ą}{{\k{A}}}1 {Ć}{{\'C}}1 {Ę}{{\k{E}}}1 {Ł}{{\L{}}}1
+        {Ń}{{\'N}}1 {Ó}{{\'O}}1 {Ś}{{\'S}}1 {Ź}{{\'Z}}1 {Ż}{{\.Z}}1,
+}
+\lstset{style=python}
+
+\newtcolorbox{warningbox}[1][]{
+    colback=red!5, colframe=red!60!black,
+    fonttitle=\bfseries, title=#1, breakable, enhanced
+}
+\newtcolorbox{infobox}[1][]{
+    colback=blue!5, colframe=blue!40!black,
+    fonttitle=\bfseries, title=#1, breakable, enhanced
+}
+\newtcolorbox{tipbox}[1][]{
+    colback=green!5, colframe=green!40!black,
+    fonttitle=\bfseries, title=#1, breakable, enhanced
+}
+
+\title{
+    \vspace{-1cm}
+    {\Large Raport o stanie gałęzi}\\[0.5em]
+    {\LARGE\bfseries quantum\_statesDB}\\[0.3em]
+    {\large Projekt IDUB\_2026}
+}
+\author{
+    Audyt kodu i plan działań\\[0.3em]
+    \small \url{https://github.com/e-mcQuantum-AI/IDUB_2026/tree/quantum_statesDB}
+}
+\date{28 marca 2026}
+
+\begin{document}
+\maketitle
+\thispagestyle{fancy}
+\tableofcontents
+\newpage
+
+% =====================================================================
+\section{Opis gałęzi}
+\label{sec:opis}
+
+Gałąź \texttt{quantum\_statesDB} rozszerza gałąź \texttt{main} o~moduł generowania zbiorów danych numerycznych (tablic NumPy) zamiast obrazów PNG. Wprowadza nową architekturę generatora opartą na trzech komponentach:
+
+\begin{enumerate}
+    \item \textbf{\texttt{src/dataset/state\_sampler.py}} --- funkcja losująca stany kwantowe z~etykietami,
+    \item \textbf{\texttt{src/dataset/generator.py}} --- klasa \texttt{DatasetGenerator} łącząca sampler z~pipeline'em pomiarowym,
+    \item \textbf{\texttt{scripts/generate\_dataset.py}} --- skrypt uruchamiający generowanie 1000 próbek i~zapisujący wynik do \texttt{.npz}.
+\end{enumerate}
+
+Jest to istotny krok w~kierunku modułu ML --- dane w~formacie tablicowym (NumPy) są bezpośrednio gotowe do użycia jako dane treningowe, w~przeciwieństwie do obrazów PNG z~gałęzi \texttt{main}.
+
+\noindent\textbf{Nowe pliki}: 3 pliki, $\sim$60 linii kodu.\\
+\textbf{Zmiana w istniejącym kodzie}: 1 linia w~\texttt{generate.py} (dodanie folderu \texttt{noisy}).
+
+% =====================================================================
+\section{Ocena nowego kodu}
+
+\subsection{Co działa dobrze}
+
+\begin{tipbox}[Mocne strony gałęzi]
+\begin{itemize}
+    \item \textbf{Dobra architektura}: rozdzielenie odpowiedzialności na sampler, generator i~skrypt --- czytelny wzorzec \emph{strategy} (strategia losowania jest wymienną funkcją).
+    \item \textbf{Użycie istniejących klas}: \texttt{generate\_dataset.py} korzysta z~\texttt{WignerMeasurement}, \texttt{LossChannel}, \texttt{MeasurementPipeline} --- spójność z~resztą projektu.
+    \item \textbf{Format NumPy}: zapis do \texttt{.npz} jest bezpośrednio gotowy do uczenia maszynowego (PyTorch \texttt{Dataset}, scikit-learn itp.).
+    \item \textbf{Funkcja lambda jako sampler}: elastyczny wzorzec --- łatwo podmienić \texttt{simple\_sampler} na bardziej złożony.
+\end{itemize}
+\end{tipbox}
+
+\subsection{Poprawność fizyczna}
+
+\begin{table}[htbp]
+\centering
+\caption{Poprawność implementacji na gałęzi \texttt{quantum\_statesDB}.}
+\label{tab:poprawnosc-db}
+\begin{tabular}{@{}llc@{}}
+\toprule
+\textbf{Komponent} & \textbf{Ocena} & \textbf{Status} \\
+\midrule
+\texttt{DatasetGenerator.generate()} & Poprawna logika & \checkmark \\
+\texttt{simple\_sampler()} & Fizycznie poprawne stany & \checkmark \\
+Pipeline z szumem & Poprawne użycie \texttt{LossChannel} & \checkmark \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% =====================================================================
+\section{Wykryte błędy i problemy}
+\label{sec:bledy}
+
+\subsection{Błędy krytyczne}
+
+\begin{warningbox}[DB-B1. Brak plików \texttt{\_\_init\_\_.py} w \texttt{src/dataset/}]
+Nowy katalog \texttt{src/dataset/} nie ma pliku \texttt{\_\_init\_\_.py}. Import \texttt{from src.dataset.generator import DatasetGenerator} może nie działać. To ten sam problem co B1 z~gałęzi \texttt{main}, rozszerzony o~nowy katalog.
+\end{warningbox}
+
+\begin{warningbox}[DB-B2. Sampler obsługuje tylko 2 z 7 stanów]
+\texttt{simple\_sampler()} losuje tylko próżnię i~stan koherentny. Brakuje 5 stanów zaimplementowanych w~projekcie: Fock, kot, termiczny, dwumianowy, GKP. Przy 1000 próbek zbiór danych będzie zawierał tylko 2~klasy --- niewystarczające do treningu klasyfikatora rozróżniającego wszystkie typy stanów.
+\end{warningbox}
+
+\begin{warningbox}[DB-B3. Niespójność \texttt{cutoff} między generatorem a pipeline'em]
+Skrypt używa \texttt{cutoff=40}, ale domyślna rozdzielczość \texttt{WignerMeasurement} to \texttt{resolution=64}. Sam \texttt{cutoff} nie jest przekazywany do \texttt{WignerMeasurement} --- to osobne parametry, ale brak jawnej konfiguracji rozdzielczości wyjściowego obrazu Wignera oznacza, że rozmiar danych zależy od ukrytej wartości domyślnej.
+\end{warningbox}
+
+\subsection{Problemy istotne}
+
+\textbf{DB-P1. Brak \texttt{\_\_init\_\_.py} w \texttt{scripts/}} --- katalog \texttt{scripts/} nie jest pakietem Pythona, co jest akceptowalne (to skrypt uruchamiany bezpośrednio), ale wymaga uruchomienia z~poziomu katalogu głównego: \texttt{python -m scripts.generate\_dataset} lub ustawienia \texttt{PYTHONPATH}.
+
+\textbf{DB-P2. Brak walidacji w \texttt{DatasetGenerator}} --- metoda \texttt{generate()} nie sprawdza, czy \texttt{n\_samples > 0}, nie obsługuje wyjątków z~pipeline'u, nie pokazuje postępu generowania.
+
+\textbf{DB-P3. Etykiety numeryczne bez mapowania} --- \texttt{simple\_sampler} zwraca \texttt{0} (próżnia) i~\texttt{1} (koherentny), ale nigdzie nie jest zapisane mapowanie numer$\to$nazwa. Przy rozszerzeniu na więcej stanów łatwo o~pomyłkę.
+
+\textbf{DB-P4. Brak adnotacji typów i docstringów} --- żaden z~3 nowych plików nie ma type hintów ani docstringów.
+
+\textbf{DB-P5. Brak testów} --- nowy kod nie ma testów jednostkowych.
+
+\textbf{DB-P6. Stary \texttt{generate.py} nie jest używany} --- plik \texttt{src/physics/generate.py} (z błędem B2 z~\texttt{main}) nadal istnieje i~jest wywoływany bezpośrednio (\texttt{generate\_dataset(n\_samples=5)} na końcu pliku). Nowy generator go nie zastępuje --- powstaje zamieszanie, który skrypt jest aktualny.
+
+\subsection{Problemy mniejsze}
+
+\begin{itemize}
+    \item \textbf{DB-P7.} Plik wyjściowy \texttt{dataset\_v0.npz} zapisywany w~katalogu roboczym --- brak konfigurowalnej ścieżki.
+    \item \textbf{DB-P8.} Brak losowego ziarna (\texttt{random.seed} / \texttt{np.random.seed}) --- wyniki nie są odtwarzalne.
+    \item \textbf{DB-P9.} \texttt{generate.py} zmieniony (dodano folder \texttt{noisy}), ale folder ten nigdzie nie jest używany.
+\end{itemize}
+
+% =====================================================================
+\section{Nowy kod źródłowy}
+
+\begin{lstlisting}[caption={\texttt{src/dataset/state\_sampler.py} --- sampler losujący stany.}, label={lst:sampler}]
+import random
+from src.physics.state.vacuum import VacuumState
+from src.physics.state.coherent import CoherentState
+
+def simple_sampler(cutoff):
+
+    choice = random.choice(["vacuum", "coherent"])
+
+    if choice == "vacuum":
+        return VacuumState(cutoff), 0
+
+    else:
+        alpha = random.uniform(0.5, 2.0)
+        return CoherentState(alpha, cutoff), 1
+\end{lstlisting}
+
+\begin{lstlisting}[caption={\texttt{src/dataset/generator.py} --- generator zbiorów danych.}, label={lst:generator}]
+import numpy as np
+
+class DatasetGenerator:
+
+    def __init__(self, state_sampler, pipeline):
+        self.state_sampler = state_sampler
+        self.pipeline = pipeline
+
+    def generate(self, n_samples):
+        X = []
+        y = []
+
+        for _ in range(n_samples):
+            state, label = self.state_sampler()
+            W = self.pipeline.run(state)
+
+            X.append(W)
+            y.append(label)
+
+        return np.array(X), np.array(y)
+\end{lstlisting}
+
+\begin{lstlisting}[caption={\texttt{scripts/generate\_dataset.py} --- skrypt generujący zbiór danych.}, label={lst:script}]
+from src.physics.measurement.wigner import WignerMeasurement
+from src.physics.noise.loss import LossChannel
+from src.physics.measurement.pipeline import MeasurementPipeline
+from src.dataset.generator import DatasetGenerator
+from src.dataset.state_sampler import simple_sampler
+import numpy as np
+
+if __name__ == '__main__':
+    cutoff = 40
+
+    measurement = WignerMeasurement()
+    noise = LossChannel(cutoff=cutoff, gamma=0.1)
+
+    pipeline = MeasurementPipeline(measurement, noise)
+
+    generator = DatasetGenerator(
+        lambda: simple_sampler(cutoff),
+        pipeline
+    )
+
+    X, y = generator.generate(1000)
+
+    np.savez("dataset_v0.npz", X=X, y=y)
+\end{lstlisting}
+
+% =====================================================================
+\section{Plan działań}
+
+\subsection{Faza DB-1 --- Naprawy krytyczne}
+
+\begin{table}[htbp]
+\centering
+\caption{Faza DB-1: naprawy krytyczne.}
+\begin{tabular}{@{}lp{9cm}r@{}}
+\toprule
+\textbf{\#} & \textbf{Zadanie} & \textbf{Czas} \\
+\midrule
+DB-1.1 & Dodać \texttt{\_\_init\_\_.py} w \texttt{src/dataset/} & 10~min \\
+DB-1.2 & Rozszerzyć \texttt{simple\_sampler} o~wszystkie 7 stanów & 2~godz. \\
+DB-1.3 & Jawnie przekazywać \texttt{resolution} do \texttt{WignerMeasurement} w~skrypcie & 15~min \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{DB-1.2 Rozszerzenie samplera o wszystkie stany}
+
+Obecna implementacja losuje tylko 2~stany (próżnia, koherentny). Aby zbiór danych był użyteczny do klasyfikacji, sampler powinien obejmować wszystkie 7~typów:
+
+\begin{lstlisting}[caption={Proponowany rozszerzony sampler.}, label={lst:full-sampler}]
+import random
+from src.physics.state.vacuum import VacuumState
+from src.physics.state.fock import FockState
+from src.physics.state.coherent import CoherentState
+from src.physics.state.cat import CatState
+from src.physics.state.thermal import ThermalState
+from src.physics.state.binomial import BinomialState
+from src.physics.state.gkp import GKPState
+
+# Mapowanie etykiet: numer -> nazwa stanu
+LABEL_MAP = {
+    0: "vacuum",
+    1: "fock",
+    2: "coherent",
+    3: "cat",
+    4: "thermal",
+    5: "binomial",
+    6: "gkp",
+}
+
+def full_sampler(cutoff: int):
+    """Losuje stan kwantowy ze wszystkich 7 typow.
+
+    Returns:
+        (state, label): para (obiekt QuantumState, int).
+    """
+    label = random.randint(0, 6)
+    name = LABEL_MAP[label]
+
+    if name == "vacuum":
+        return VacuumState(cutoff), label
+    elif name == "fock":
+        n = random.randint(1, min(7, cutoff - 1))
+        return FockState(n, cutoff), label
+    elif name == "coherent":
+        alpha = random.uniform(0.5, 3.0)
+        return CoherentState(alpha, cutoff), label
+    elif name == "cat":
+        alpha = random.uniform(1.5, 3.0)
+        return CatState(alpha, cutoff), label
+    elif name == "thermal":
+        n_th = random.uniform(0.5, 4.0)
+        return ThermalState(n_th, cutoff), label
+    elif name == "binomial":
+        N = random.randint(2, min(6, cutoff - 1))
+        p = random.uniform(0.2, 0.8)
+        return BinomialState(N, p, cutoff), label
+    elif name == "gkp":
+        delta = random.uniform(0.25, 0.5)
+        return GKPState(cutoff, delta), label
+\end{lstlisting}
+
+\textbf{Kryterium}: Wygenerowany zbiór zawiera wszystkie 7~klas. Rozkład klas jest w~przybliżeniu równomierny.
+
+\subsubsection{DB-1.3 Jawna konfiguracja rozdzielczości}
+
+\begin{lstlisting}[caption={Jawne przekazanie rozdzielczości.}, label={lst:resolution}]
+# PRZED:
+measurement = WignerMeasurement()  # resolution=64 (ukryte)
+
+# PO:
+RESOLUTION = 64
+measurement = WignerMeasurement(x_max=5, resolution=RESOLUTION)
+\end{lstlisting}
+
+% -------
+\subsection{Faza DB-2 --- Ulepszenia}
+
+\begin{table}[htbp]
+\centering
+\caption{Faza DB-2: ulepszenia.}
+\begin{tabular}{@{}lp{9cm}r@{}}
+\toprule
+\textbf{\#} & \textbf{Zadanie} & \textbf{Czas} \\
+\midrule
+DB-2.1 & Dodać mapowanie etykiet (\texttt{LABEL\_MAP}) i~zapis do \texttt{.npz} & 30~min \\
+DB-2.2 & Dodać postęp generowania (\texttt{tqdm} lub \texttt{print}) & 15~min \\
+DB-2.3 & Dodać odtwarzalność (\texttt{random.seed}, \texttt{np.random.seed}) & 15~min \\
+DB-2.4 & Sparametryzować ścieżkę wyjściową i~liczbę próbek (argparse) & 1~godz. \\
+DB-2.5 & Usunąć lub oznaczyć stary \texttt{src/physics/generate.py} jako przestarzały & 15~min \\
+DB-2.6 & Usunąć nieużywany folder \texttt{noisy} z~\texttt{setup\_folders()} & 5~min \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% -------
+\subsection{Faza DB-3 --- Jakość i testy}
+
+\begin{table}[htbp]
+\centering
+\caption{Faza DB-3: jakość kodu i testy.}
+\begin{tabular}{@{}lp{9cm}r@{}}
+\toprule
+\textbf{\#} & \textbf{Zadanie} & \textbf{Czas} \\
+\midrule
+DB-3.1 & Dodać adnotacje typów do \texttt{generator.py} i~\texttt{state\_sampler.py} & 30~min \\
+DB-3.2 & Dodać docstringi & 30~min \\
+DB-3.3 & Testy: \texttt{DatasetGenerator} zwraca tablice o~poprawnych kształtach & 1~godz. \\
+DB-3.4 & Testy: sampler zwraca poprawne typy i~etykiety z~zakresu & 1~godz. \\
+DB-3.5 & Testy: wygenerowany zbiór jest fizycznie poprawny (brak NaN/Inf) & 30~min \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Przykłady testów:
+
+\begin{lstlisting}[caption={Testy dla modułu \texttt{dataset}.}, label={lst:test-dataset}]
+class TestDatasetGenerator:
+    def test_output_shape(self):
+        """Wygenerowane tablice maja poprawne kszalty."""
+        wm = WignerMeasurement(x_max=5, resolution=32)
+        pipeline = MeasurementPipeline(measurement=wm)
+        gen = DatasetGenerator(
+            lambda: (VacuumState(20), 0), pipeline
+        )
+        X, y = gen.generate(5)
+        assert X.shape == (5, 32, 32)
+        assert y.shape == (5,)
+
+    def test_no_nan(self):
+        """Brak wartosci NaN w danych."""
+        wm = WignerMeasurement(x_max=5, resolution=32)
+        pipeline = MeasurementPipeline(measurement=wm)
+        gen = DatasetGenerator(
+            lambda: (VacuumState(20), 0), pipeline
+        )
+        X, y = gen.generate(3)
+        assert np.isfinite(X).all()
+
+class TestStateSampler:
+    def test_returns_valid_types(self):
+        """Sampler zwraca (QuantumState, int)."""
+        state, label = simple_sampler(20)
+        assert hasattr(state, 'density_matrix')
+        assert isinstance(label, int)
+
+    def test_label_range(self):
+        """Etykiety w zakresie [0, 1]."""
+        labels = [simple_sampler(20)[1] for _ in range(100)]
+        assert set(labels) == {0, 1}
+\end{lstlisting}
+
+% =====================================================================
+\section{Relacja z gałęzią main}
+\label{sec:relacja}
+
+\begin{infobox}[Zalecenia dotyczące scalenia]
+\begin{enumerate}
+    \item \textbf{Przed merge'em}: najpierw wykonać naprawy z~Fazy~1 gałęzi \texttt{main} (pliki \texttt{\_\_init\_\_.py}, literówka \texttt{binomial.py}, dziedziczenie kanałów) --- bez nich kod z~\texttt{quantum\_statesDB} nie uruchomi się poprawnie.
+    \item \textbf{Rozszerzyć sampler} (DB-1.2) przed scaleniem --- zbiór z~2 klasami ma ograniczoną wartość.
+    \item \textbf{Usunąć stary \texttt{generate.py}} lub oznaczyć jako przestarzały (DB-2.5) --- dwa generatory tworzą zamieszanie.
+    \item \textbf{Scalenie}: po naprawach z~obu stron, merge \texttt{quantum\_statesDB} $\to$ \texttt{main} powinien przebiec bez konfliktów (nowe pliki, minimalna zmiana w~istniejących).
+\end{enumerate}
+\end{infobox}
+
+% =====================================================================
+\section{Podsumowanie}
+
+Gałąź \texttt{quantum\_statesDB} wprowadza \textbf{dobry fundament architektoniczny} dla generowania zbiorów danych ML: rozdzielenie samplera, generatora i~skryptu, format NumPy gotowy do treningu. Jest to krok we właściwym kierunku.
+
+\textbf{Główne braki}: sampler obsługuje tylko 2~z~7 stanów, brak \texttt{\_\_init\_\_.py}, brak mapowania etykiet, brak testów.
+
+\textbf{Szacowany nakład}: ok.~\textbf{8 godzin} na wszystkie 3~fazy (DB-1 $\to$ DB-2 $\to$ DB-3).
+
+\textbf{Zalecana kolejność}: naprawy \texttt{main} (Faza~1) $\to$ naprawy \texttt{quantum\_statesDB} (DB-1) $\to$ scalenie $\to$ DB-2, DB-3.
+
+\printbibliography[title={Bibliografia}]
+
+\end{document}
