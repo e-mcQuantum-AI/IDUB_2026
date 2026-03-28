@@ -10,3 +10,16 @@ __pycache__/
 /quantum_dataset/*
 data/*
 /divided/*
+# LaTeX build artifacts
+*.aux
+*.bbl
+*.bcf
+*.blg
+*.log
+*.out
+*.run.xml
+*.toc
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+*.tmp.*

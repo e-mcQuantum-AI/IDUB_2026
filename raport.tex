@@ -1,0 +1,1119 @@
+\documentclass[12pt,a4paper]{article}
+
+% === Kodowanie i język ===
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[polish]{babel}
+
+% === Układ strony ===
+\usepackage[margin=2.5cm, headheight=14.5pt]{geometry}
+\usepackage{setspace}
+\onehalfspacing
+
+% === Grafika i kolory ===
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta, positioning, shapes.geometric, calc}
+
+% === Tabele ===
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{multirow}
+
+% === Listingi kodu ===
+\usepackage{listings}
+\definecolor{codebg}{RGB}{248,248,248}
+\definecolor{codegreen}{RGB}{40,160,40}
+\definecolor{codegray}{RGB}{128,128,128}
+\definecolor{codepurple}{RGB}{160,32,240}
+\definecolor{codeblue}{RGB}{0,80,180}
+
+\lstdefinestyle{python}{
+    language=Python,
+    backgroundcolor=\color{codebg},
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{codeblue}\bfseries,
+    stringstyle=\color{codegreen},
+    commentstyle=\color{codegray}\itshape,
+    numberstyle=\tiny\color{codegray},
+    numbers=left,
+    numbersep=8pt,
+    frame=single,
+    framerule=0.4pt,
+    rulecolor=\color{codegray!50},
+    breaklines=true,
+    showstringspaces=false,
+    tabsize=4,
+    captionpos=b,
+    aboveskip=10pt,
+    belowskip=10pt,
+    morekeywords={self, True, False, None, as, assert, with},
+    literate=
+        {ą}{{\k{a}}}1 {ć}{{\'c}}1 {ę}{{\k{e}}}1 {ł}{{\l{}}}1
+        {ń}{{\'n}}1 {ó}{{\'o}}1 {ś}{{\'s}}1 {ź}{{\'z}}1 {ż}{{\.z}}1
+        {Ą}{{\k{A}}}1 {Ć}{{\'C}}1 {Ę}{{\k{E}}}1 {Ł}{{\L{}}}1
+        {Ń}{{\'N}}1 {Ó}{{\'O}}1 {Ś}{{\'S}}1 {Ź}{{\'Z}}1 {Ż}{{\.Z}}1,
+}
+\lstset{style=python}
+
+\lstdefinestyle{yaml}{
+    basicstyle=\ttfamily\small,
+    backgroundcolor=\color{codebg},
+    frame=single,
+    framerule=0.4pt,
+    rulecolor=\color{codegray!50},
+    breaklines=true,
+    showstringspaces=false,
+    captionpos=b,
+    aboveskip=10pt,
+    belowskip=10pt,
+}
+
+\lstdefinestyle{tree}{
+    basicstyle=\ttfamily\small,
+    backgroundcolor=\color{codebg},
+    frame=single,
+    framerule=0.4pt,
+    rulecolor=\color{codegray!50},
+    breaklines=true,
+    captionpos=b,
+    aboveskip=10pt,
+    belowskip=10pt,
+}
+
+% === Matematyka ===
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{braket}
+
+% === Cudzysłowy ===
+\usepackage{csquotes}
+
+% === Hiperłącza ===
+\usepackage[colorlinks=true, linkcolor=blue!70!black, citecolor=blue!70!black, urlcolor=blue!60!black]{hyperref}
+
+% === Bibliografia ===
+\usepackage[backend=biber, style=numeric, sorting=none, urldate=long]{biblatex}
+\addbibresource{raport.bib}
+
+% === Nagłówek i stopka ===
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\textit{IDUB\_2026 --- Raport o stanie projektu}}
+\fancyhead[R]{\small\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+% === Formatowanie sekcji ===
+\usepackage{titlesec}
+\titleformat{\section}{\Large\bfseries}{\thesection.}{0.5em}{}
+\titleformat{\subsection}{\large\bfseries}{\thesubsection.}{0.5em}{}
+\titleformat{\subsubsection}{\normalsize\bfseries}{\thesubsubsection.}{0.5em}{}
+
+% === Otoczenia informacyjne ===
+\usepackage{tcolorbox}
+\tcbuselibrary{breakable, skins}
+
+\newtcolorbox{infobox}[1][]{
+    colback=blue!5, colframe=blue!40!black,
+    fonttitle=\bfseries, title=#1,
+    breakable, enhanced
+}
+
+\newtcolorbox{warningbox}[1][]{
+    colback=red!5, colframe=red!60!black,
+    fonttitle=\bfseries, title=#1,
+    breakable, enhanced
+}
+
+\newtcolorbox{tipbox}[1][]{
+    colback=green!5, colframe=green!40!black,
+    fonttitle=\bfseries, title=#1,
+    breakable, enhanced
+}
+
+% === Metadane ===
+\title{
+    \vspace{-1cm}
+    {\Large Raport o stanie projektu}\\[0.5em]
+    {\LARGE\bfseries IDUB\_2026}\\[0.3em]
+    {\large Głębokie uczenie do klasyfikacji i rekonstrukcji\\kwantowych stanów optycznych}
+}
+\author{
+    Audyt kodu i plan działań\\[0.3em]
+    \small Repozytorium: \url{https://github.com/e-mcQuantum-AI/IDUB_2026}
+}
+\date{28 marca 2026}
+
+% =====================================================================
+\begin{document}
+\maketitle
+\thispagestyle{fancy}
+
+\tableofcontents
+\newpage
+
+% =====================================================================
+\section{Opis projektu}
+\label{sec:opis}
+
+Projekt ma na celu stworzenie narzędzia do generowania syntetycznych danych obrazowych (funkcji Wignera) kwantowych stanów optycznych, które posłużą jako zbiór treningowy do klasyfikacji i rekonstrukcji stanów za pomocą głębokiego uczenia.
+
+Obecny kod obejmuje:
+\begin{itemize}
+    \item Implementację 7 stanów kwantowych (Fock, koherentny, kot Schrödingera, GKP, dwumianowy, termiczny, próżnia),
+    \item Kanały szumu kwantowego (straty fotonowe, mieszanina stanów),
+    \item Pomiar funkcją Wignera z potokiem pomiarowym (pipeline),
+    \item Skrypty do generowania i dzielenia obrazów zbioru danych.
+\end{itemize}
+
+\noindent\textbf{Rozmiar kodu}: ok.~330 linii Pythona w~18 plikach.
+
+% =====================================================================
+\section{Wprowadzenie do pojęć --- dla początkujących}
+\label{sec:pojecia}
+
+Ten rozdział wyjaśnia kluczowe pojęcia z fizyki kwantowej i programowania, które pojawiają się w dalszej części raportu.
+
+% ----- Fizyka kwantowa -----
+\subsection{Pojęcia z fizyki kwantowej}
+
+\subsubsection{Stan kwantowy i notacja Diraca}
+
+\textbf{Stan kwantowy} to matematyczny opis układu kwantowego. W~tym projekcie opisujemy stany światła (fotony w~jednym modzie pola elektromagnetycznego).
+
+\textbf{Ket} $\ket{\psi}$ (czytaj: \emph{ket psi}) --- wektor opisujący stan kwantowy w~notacji Diraca. Na przykład $\ket{3}$ oznacza stan z~dokładnie 3 fotonami. W~kodzie ket to wektor kolumnowy (obiekt \texttt{Qobj} z~biblioteki QuTiP).
+
+\textbf{Bra} $\bra{\psi}$ --- wektor sprzężony do ketu (transponowany i~zespolenie sprzężony, czyli hermitowsko sprzężony). Potrzebny do obliczeń, np. iloczynu skalarnego $\braket{\psi|\psi}$.
+
+\textbf{Iloczyn skalarny} $\braket{\psi|\psi}$ --- miara ,,nakładania się'' dwóch stanów. Jeśli $\braket{\psi|\psi} = 1$, stan jest \textbf{znormalizowany} (ma sens fizyczny).
+
+\subsubsection{Stan czysty a stan mieszany}
+
+\begin{itemize}
+    \item \textbf{Stan czysty} --- układ jest w~jednym, określonym stanie kwantowym $\ket{\psi}$. Przykład: dokładnie 3 fotony.
+    \item \textbf{Stan mieszany} --- układ jest w~jednym z~kilku stanów z~pewnym prawdopodobieństwem (mieszanina statystyczna). Przykład: stan termiczny --- nie wiemy, ile jest fotonów, znamy tylko średnią. Stanu mieszanego \textbf{nie da się} opisać pojedynczym ketem.
+\end{itemize}
+
+\subsubsection{Macierz gęstości}
+
+\textbf{Macierz gęstości} $\rho$ --- uniwersalny sposób opisu stanu kwantowego, działa zarówno dla stanów czystych, jak i~mieszanych:
+\begin{align}
+    \text{Stan czysty:} \quad & \rho = \ket{\psi}\bra{\psi} \label{eq:rho-pure} \\
+    \text{Stan mieszany:} \quad & \rho = \sum_i p_i \ket{\psi_i}\bra{\psi_i} \label{eq:rho-mixed}
+\end{align}
+
+\noindent W~kodzie: \texttt{state.density\_matrix()} zwraca macierz kwadratową.
+
+\begin{infobox}[Fizyczność macierzy gęstości]
+Poprawna macierz gęstości musi spełniać 3 warunki:
+\begin{enumerate}
+    \item \textbf{Hermitowskość}: $\rho = \rho^\dagger$ --- macierz jest równa swojemu sprzężeniu hermitowskiemu (tzn.\ transpozycji ze sprzężeniem zespolonym).
+    \item \textbf{Ślad = 1}: $\mathrm{Tr}(\rho) = 1$ --- prawdopodobieństwa sumują się do~1.
+    \item \textbf{Dodatnia półokreśloność}: wszystkie wartości własne $\geq 0$ --- prawdopodobieństwa nie mogą być ujemne.
+\end{enumerate}
+\end{infobox}
+
+\subsubsection{Przestrzeń Hilberta i cutoff}
+
+\textbf{Przestrzeń Hilberta} to przestrzeń matematyczna, w~której ,,żyją'' stany kwantowe. Jej wymiar jest teoretycznie nieskończony (oscylator może zawierać dowolnie wiele fotonów), ale w~komputerze musimy ją \textbf{obciąć} --- parametr \texttt{cutoff} określa, ile stanów bazowych ($0, 1, 2, \ldots, \texttt{cutoff}-1$ fotonów) uwzględniamy. Na przykład \texttt{cutoff=32} oznacza, że rozważamy stany od~0 do~31 fotonów.
+
+\subsubsection{Operatory kreacji i anihilacji}
+
+Operatory matematyczne na przestrzeni Hilberta:
+\begin{align}
+    \hat{a}\ket{n} &= \sqrt{n}\,\ket{n-1} && \text{anihilacja --- ,,zabiera'' foton} \\
+    \hat{a}^\dagger\ket{n} &= \sqrt{n+1}\,\ket{n+1} && \text{kreacja --- ,,dodaje'' foton} \\
+    \hat{n} = \hat{a}^\dagger\hat{a} && && \text{operator liczby fotonów: } \hat{n}\ket{n} = n\ket{n}
+\end{align}
+
+\noindent W~kodzie: \texttt{destroy()} = $\hat{a}$, \texttt{create()} = $\hat{a}^\dagger$.
+
+\subsubsection{Funkcja Wignera}
+
+Sposób wizualizacji stanu kwantowego jako ,,mapy cieplnej'' w~\textbf{przestrzeni fazowej} (oś~$x$ = pozycja~$q$, oś~$y$ = pęd~$p$). Formalnie, dla macierzy gęstości~$\rho$ (w~jednostkach, w~których $\hbar = 2$, zgodnie z~konwencją QuTiP):
+\begin{equation}
+    W(q, p) = \frac{1}{\pi\hbar} \int_{-\infty}^{\infty} \bra{q + y}\rho\ket{q - y}\, e^{2ipy/\hbar}\, dy
+    \label{eq:wigner}
+\end{equation}
+gdzie $\hbar$ to zredukowana stała Plancka (podstawowa stała fizyczna łącząca skalę kwantową z~klasyczną). W~praktyce nie trzeba liczyć tej całki ręcznie --- biblioteka QuTiP oblicza ją automatycznie funkcją \texttt{wigner(rho, xvec, xvec)}.
+
+Każdy typ stanu ma charakterystyczny wzór na wykresie Wignera --- to właśnie te wzory projekt chce klasyfikować za pomocą uczenia maszynowego. Funkcja Wignera może przyjmować \textbf{wartości ujemne} --- to cecha typowo kwantowa, niemożliwa w~fizyce klasycznej (ujemność Wignera jest świadectwem nieklasyczności stanu). Schemat potoku pomiarowego przedstawia Rysunek~\ref{fig:pipeline}.
+
+\subsubsection{Operator przesunięcia}
+
+$\hat{D}(\alpha)$ --- przesuwa stan w~przestrzeni fazowej o~wektor $\alpha$ (liczba zespolona: $\mathrm{Re}(\alpha)$ = przesunięcie w~$q$, $\mathrm{Im}(\alpha)$ = przesunięcie w~$p$). W~kodzie: \texttt{displace(cutoff, alpha)}.
+
+\subsubsection{Równanie Lindblada i operatory kolapsu}
+
+\textbf{Równanie Lindblada} (zwane też \emph{master equation})~\cite{lindblad1976} --- równanie opisujące ewolucję czasową stanu kwantowego oddziałującego z~otoczeniem (układ otwarty). W~tym projekcie służy do symulacji szumu: zamiast izolowanej ewolucji unitarnej, stan $\rho$ ewoluuje z~uwzględnieniem strat do otoczenia.
+
+\textbf{Operator kolapsu} $\hat{c}$ --- operator opisujący konkretny mechanizm oddziaływania z~otoczeniem w~równaniu Lindblada. Różne operatory kolapsu modelują różne rodzaje szumu:
+\begin{itemize}
+    \item $\hat{c} = \sqrt{\gamma}\,\hat{a}$ --- straty fotonowe (fotony uciekają z~układu),
+    \item $\hat{c} = \sqrt{\gamma}\,\hat{a}^\dagger\hat{a}$ --- defazowanie (utrata informacji o~fazie),
+    \item $\hat{c} = \sqrt{\gamma}\,\hat{a}^\dagger$ --- spontaniczne wzmocnienie (dodawanie fotonów).
+\end{itemize}
+
+\noindent W~kodzie: parametr \texttt{c\_ops} w~funkcji \texttt{mesolve()} z~biblioteki QuTiP~\cite{qutip}.
+
+% ----- Stany kwantowe -----
+\subsection{Stany kwantowe zaimplementowane w projekcie}
+\label{sec:stany-opis}
+
+\begin{table}[htbp]
+\centering
+\caption{Stany kwantowe zaimplementowane w projekcie.}
+\label{tab:stany}
+\begin{tabular}{@{}llp{5.5cm}p{4cm}@{}}
+\toprule
+\textbf{Stan} & \textbf{Symbol} & \textbf{Opis intuicyjny} & \textbf{Przykład} \\
+\midrule
+Próżnia & $\ket{0}$ & Brak fotonów, lecz niezerowe fluktuacje kwantowe (energia punktu zerowego). & Najniższy stan energetyczny pola \\
+\addlinespace
+Fock & $\ket{n}$ & Dokładnie $n$ fotonów. Stan o~określonej liczbie cząstek. & Foton z~emitera kwantowego \\
+\addlinespace
+Koherentny & $\ket{\alpha}$ & Stan najbliższy klasycznemu światłu. $\langle\hat{n}\rangle = |\alpha|^2$. & Światło lasera \\
+\addlinespace
+Kot & $\ket{\alpha}+\ket{-\alpha}$ & Superpozycja dwóch stanów koherentnych --- ,,jednocześnie tu i~tam''. & Eksperyment Schrödingera \\
+\addlinespace
+Termiczny & $\rho_\mathrm{th}$ & Stan mieszany w~równowadze termicznej (rozkład Bosego--Einsteina). & Promieniowanie żarówki \\
+\addlinespace
+Dwumianowy & $\ket{\psi_\mathrm{bin}}$ & Superpozycja stanów Focka ze współczynnikami dwumianowymi~\cite{michael2016}. & Pamięci kwantowe \\
+\addlinespace
+GKP & $\ket{\mathrm{GKP}}$ & Kod korekcji błędów: kubit zakodowany w~oscylatorze harmonicznym~\cite{gottesman2001}. & Komputery kwantowe ze zmiennymi ciągłymi \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ----- Kanały szumu -----
+\subsection{Kanały szumu kwantowego}
+
+Kanał szumu to operacja symulująca niedoskonałości fizyczne --- wprowadza szum do stanu kwantowego. Zaimplementowane w~projekcie kanały (straty, mieszanina) zmieniają stan w~sposób nieodwracalny:
+
+\begin{table}[htbp]
+\centering
+\caption{Kanały szumu zaimplementowane w projekcie.}
+\label{tab:kanaly}
+\begin{tabular}{@{}lp{6cm}p{5cm}@{}}
+\toprule
+\textbf{Kanał} & \textbf{Co robi} & \textbf{Analogia} \\
+\midrule
+Straty fotonowe & Fotony ,,uciekają'' z~układu z~intensywnością~$\gamma$ (im większe~$\gamma$, tym więcej strat). Zmniejsza $\langle\hat{n}\rangle$. & Światło przez brudne szkło \\
+\addlinespace
+Mieszanina & Miesza dwa stany: $\rho' = p\rho + (1-p)\rho_\mathrm{other}$. & Niedoskonały detektor \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ----- Pojęcia programistyczne -----
+\subsection{Pojęcia programistyczne}
+
+\begin{description}
+    \item[\texttt{\_\_init\_\_.py}] Specjalny plik w~Pythonie, który mówi interpreterowi: ,,ten katalog jest pakietem Pythona''. Bez niego nie można pisać \texttt{from src.physics import FockState}.
+    \item[Klasa abstrakcyjna (ABC)] Klasa definiująca ,,umowę'' (interfejs): mówi, jakie metody muszą mieć klasy potomne, ale sama ich nie implementuje. Np.~\texttt{QuantumState} wymaga metody \texttt{ket()}.
+    \item[Dziedziczenie] Mechanizm, w~którym klasa potomna przejmuje cechy klasy nadrzędnej. \texttt{class LossChannel(QuantumChannel)} oznacza: ,,LossChannel jest rodzajem QuantumChannel''.
+    \item[Type hints] Adnotacje typów: \texttt{def ket(self) -> Qobj:} mówi ,,ta metoda zwraca Qobj''. Python ich nie wymusza, ale pomagają w~wykrywaniu błędów.
+    \item[Docstring] Komentarz dokumentacyjny w~potrójnych cudzysłowach \texttt{"""}. Opisuje co robi funkcja/klasa.
+    \item[\texttt{requirements.txt}] Plik z~listą bibliotek (np.~\texttt{qutip>=5.0}). Instalacja: \texttt{pip install -r requirements.txt}.
+    \item[pytest / fixture] Framework do testów automatycznych. Fixture to przygotowane dane współdzielone przez testy.
+    \item[Pipeline] Wzorzec ,,potok'': dane przechodzą kolejno przez etapy. Tu: stan $\to$ szum $\to$ pomiar Wignera $\to$ obraz.
+    \item[CI/CD] Automatyczne uruchamianie testów przy każdym \texttt{git push}.
+\end{description}
+
+% =====================================================================
+\section{Ocena obecnego stanu}
+\label{sec:ocena}
+
+\subsection{Architektura --- ocena: DOBRA}
+
+Projekt ma przejrzystą strukturę obiektową z~użyciem klas abstrakcyjnych (ABC):
+
+\begin{lstlisting}[style=tree, caption={Struktura katalogów projektu.}, label={lst:tree}]
+src/physics/
+|-- state/          -- implementacje stanow kwantowych
+|-- noise/          -- kanaly szumowe
+|-- measurement/    -- pomiar funkcja Wignera + pipeline
+|-- divider.py      -- narzedzie do dzielenia obrazow
+|-- generate.py     -- skrypt generujacy zbior danych
+|-- hilbert.py      -- operatory przestrzeni Hilberta
+`-- validation.py   -- walidacja stanow fizycznych
+\end{lstlisting}
+
+Dobór bibliotek jest trafny: \textbf{QuTiP}~\cite{qutip}, NumPy, SciPy, Matplotlib, Pillow (biblioteka do przetwarzania obrazów, importowana jako~PIL).
+
+Zależności klas przedstawia Rysunek~\ref{fig:architektura}.
+
+\subsection{Poprawność fizyczna --- ocena: DOBRA z zastrzeżeniami}
+
+\begin{table}[htbp]
+\centering
+\caption{Poprawność implementacji stanów kwantowych.}
+\label{tab:poprawnosc}
+\begin{tabular}{@{}llc@{}}
+\toprule
+\textbf{Stan} & \textbf{Implementacja} & \textbf{Poprawność} \\
+\midrule
+Próżnia (\texttt{vacuum.py})    & \texttt{basis(N, 0)}                 & \checkmark \\
+Fock (\texttt{fock.py})          & \texttt{basis(N, n)}                 & \checkmark \\
+Koherentny (\texttt{coherent.py}) & QuTiP \texttt{coherent()}          & \checkmark \\
+Kot (\texttt{cat.py})            & superpozycja stanów koherentnych     & \checkmark \\
+Termiczny (\texttt{thermal.py})  & \texttt{thermal\_dm()}, stan mieszany & \checkmark \\
+GKP (\texttt{gkp.py})           & obwiednia gaussowska + przesunięcia  & $\triangle$ \\
+Dwumianowy (\texttt{binomal.py}) & współczynniki dwumianowe             & $\triangle$ \\
+\bottomrule
+\end{tabular}
+
+\smallskip
+\footnotesize \checkmark\ = poprawna, \quad $\triangle$ = wymaga weryfikacji
+\end{table}
+
+\subsection{Jakość kodu --- ocena: PRZECIĘTNA}
+
+\begin{table}[htbp]
+\centering
+\caption{Ocena aspektów jakości kodu.}
+\label{tab:jakosc}
+\begin{tabular}{@{}llp{6cm}@{}}
+\toprule
+\textbf{Aspekt} & \textbf{Ocena} & \textbf{Uwagi} \\
+\midrule
+Struktura katalogów & Dobra    & Logiczny podział na moduły \\
+Czytelność          & Dobra    & Krótkie, jasne funkcje \\
+Styl (PEP8)         & Dobra    & Generalnie zgodny \\
+Dokumentacja        & Słaba    & Brak docstringów \\
+Typowanie           & Brak     & Zero adnotacji typów \\
+Obsługa błędów      & Brak     & Brak walidacji wejścia \\
+Testy               & Brak     & Zero testów \\
+Konfiguracja        & Słaba    & Ścieżki na sztywno \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% =====================================================================
+\section{Wykryte błędy i problemy}
+\label{sec:bledy}
+
+\subsection{Błędy krytyczne}
+
+\begin{warningbox}[B1. Brak plików \texttt{\_\_init\_\_.py}]
+Żaden pakiet nie ma pliku \texttt{\_\_init\_\_.py}. Import modułów przez \texttt{from src.physics import ...} jest niemożliwy. Dotyczy: \texttt{src/}, \texttt{src/physics/}, \texttt{src/physics/state/}, \texttt{src/physics/noise/}, \texttt{src/physics/measurement/}.
+\end{warningbox}
+
+\begin{warningbox}[B2. Błąd matematyczny w \texttt{generate.py} (linia 44)]
+Kod tworzy superpozycję dwóch stanów Focka zamiast prawdziwego stanu dwumianowego:
+\begin{lstlisting}[numbers=none]
+state_binomial = (fock(N, n) + p * fock(N, n+1)).unit()
+\end{lstlisting}
+To NIE jest stan dwumianowy --- to $\ket{n} + p\ket{n+1}$. Prawdziwa implementacja istnieje w~\texttt{state/binomal.py}, ale nie jest używana przez generator.
+\end{warningbox}
+
+\begin{warningbox}[B3. Literówka w nazwie pliku]
+Plik \texttt{state/binomal.py} powinien nazywać się \texttt{binomial.py}.
+\end{warningbox}
+
+\begin{warningbox}[B4. Kanały szumu nie dziedziczą po klasie bazowej]
+\texttt{LossChannel} i~\texttt{MixtureChannel} nie dziedziczą po \texttt{QuantumChannel} (zdefiniowanej w~\texttt{noise/base.py}). Oznacza to, że Python nie wie, iż te klasy są kanałami kwantowymi --- nie można ich używać zamiennie w~kodzie oczekującym obiektu typu \texttt{QuantumChannel} (np.~w~\texttt{MeasurementPipeline}).
+\end{warningbox}
+
+\subsection{Problemy istotne}
+
+\textbf{P1. Ścieżki wpisane na sztywno} --- \texttt{divider.py}: \texttt{'quantum\_dataset/clean/'}, \texttt{generate.py}: \texttt{'quantum\_dataset/'}. Brak przenośności.
+
+\textbf{P2. Brak \texttt{requirements.txt}} --- Zależności (QuTiP, NumPy, SciPy, Matplotlib, Pillow, OpenCV) nie są udokumentowane.
+
+\textbf{P3. Brak walidacji danych wejściowych} --- \texttt{BinomialState}: brak sprawdzenia $p \in [0,1]$, $N \geq 0$; \texttt{MixtureChannel}: brak sprawdzenia $p \in [0,1]$; \texttt{LossChannel}: brak sprawdzenia $\gamma \geq 0$.
+
+\textbf{P4. Wzór GKP nieudokumentowany} --- Stan GKP (Gottesman--Kitaev--Preskill)~\cite{gottesman2001} to kwantowy kod korekcji błędów kodujący kubit w~oscylatorze harmonicznym. Idealny stan GKP to nieskończony grzebień delt Diraca w~przestrzeni pozycji, rozmieszczonych co $2\sqrt{\pi}$. W~praktyce stosuje się przybliżenie z~obwiednią gaussowską o~szerokości~$\delta$. Brak referencji w~kodzie utrudnia weryfikację:
+\begin{lstlisting}[numbers=none, caption={Nieudokumentowany wzór GKP w \texttt{gkp.py:25}.}]
+weight = np.exp(-(2 * s * np.sqrt(np.pi))**2 / (2 * self.delta**2))
+\end{lstlisting}
+
+\textbf{P5. Mieszanie języków} --- Komentarze w~\texttt{generate.py} po polsku, reszta kodu po angielsku.
+
+\subsection{Problemy mniejsze}
+
+\begin{itemize}
+    \item \textbf{P6.} Stała magiczna \texttt{-1e-10} w~\texttt{validation.py} --- powinna być konfigurowalna.
+    \item \textbf{P7.} Parametr \texttt{tlist=[0, 1]} w~\texttt{loss.py} --- brak wyjaśnienia jednostek czasu.
+    \item \textbf{P8.} Brak logowania --- tylko \texttt{print()} w~\texttt{generate.py}.
+\end{itemize}
+
+% =====================================================================
+\section{Kluczowe fragmenty kodu źródłowego}
+\label{sec:kod}
+
+\begin{lstlisting}[caption={Klasa bazowa stanów kwantowych (\texttt{state/base.py}).}, label={lst:base-state}]
+from abc import ABC, abstractmethod
+from qutip import Qobj
+
+class QuantumState(ABC):
+
+    @abstractmethod
+    def ket(self) -> Qobj:
+        pass
+
+    def density_matrix(self) -> Qobj:
+        psi = self.ket()
+        return psi * psi.dag()
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Klasa bazowa kanałów kwantowych (\texttt{noise/base.py}).}, label={lst:base-channel}]
+from abc import ABC, abstractmethod
+from qutip import Qobj
+
+class QuantumChannel(ABC):
+
+    @abstractmethod
+    def apply(self, rho: Qobj) -> Qobj:
+        pass
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Implementacja stanu GKP (\texttt{state/gkp.py}).}, label={lst:gkp}]
+import numpy as np
+from qutip import displace, basis
+from .base import QuantumState
+
+class GKPState(QuantumState):
+
+    def __init__(self, cutoff: int, delta: float = 0.3, grid_size: int = 5):
+        self.cutoff = cutoff
+        self.delta = delta
+        self.grid_size = grid_size
+
+    def ket(self):
+        psi = 0
+        vacuum = basis(self.cutoff, 0)
+
+        for s in range(-self.grid_size, self.grid_size + 1):
+            q_shift = 2 * s * np.sqrt(np.pi)
+            D = displace(self.cutoff, q_shift / np.sqrt(2))
+            weight = np.exp(-(2 * s * np.sqrt(np.pi))**2
+                            / (2 * self.delta**2))
+            psi += weight * D * vacuum
+
+        return psi.unit()
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Generator zbioru danych (\texttt{generate.py}) --- fragment z błędem B2.}, label={lst:generate}]
+import os
+import numpy as np
+import matplotlib.pyplot as plt
+from qutip import fock, coherent, wigner, ket2dm
+
+def generate_dataset(n_samples=10, resolution=100):
+    paths = setup_folders()
+    N = 32
+    xvec = np.linspace(-5, 5, resolution)
+
+    for i in range(n_samples):
+        # --- FOCK STATE ---
+        n_photons = np.random.randint(0, 8)
+        state_fock = fock(N, n_photons)
+        w_clean = wigner(state_fock, xvec, xvec)
+        plt.imsave(os.path.join(paths["clean"],
+            f"fock_n{n_photons}_id{i}.png"), w_clean, cmap='RdBu_r')
+
+        # --- BINOMIAL STATE (BLAD! To nie jest stan dwumianowy) ---
+        n = np.random.randint(0, 8)
+        p = np.random.uniform(0.1, 0.9)
+        state_binomial = (fock(N, n) + p * fock(N, n+1)).unit()  # B2!
+\end{lstlisting}
+
+% =====================================================================
+\section{Plan kolejnych działań --- podsumowanie faz}
+\label{sec:plan-podsumowanie}
+
+\begin{table}[htbp]
+\centering
+\caption{Podsumowanie faz planu działań.}
+\label{tab:fazy}
+\begin{tabular}{@{}clp{7.5cm}r@{}}
+\toprule
+\textbf{Faza} & \textbf{Priorytet} & \textbf{Zakres} & \textbf{Czas} \\
+\midrule
+1 & WYSOKI  & Naprawa błędów krytycznych (B1--B4, weryfikacja wzorów) & $\sim$4h \\
+2 & WYSOKI  & Infrastruktura (\texttt{requirements.txt}, parametryzacja, README) & $\sim$5h \\
+3 & ŚREDNI  & Jakość kodu (typy, docstringi, walidacja, referencje) & $\sim$11h \\
+4 & ŚREDNI  & Testy (pytest, testy stanów, kanałów, pipeline) & $\sim$10h \\
+5 & NISKI   & Rozwój (nowe kanały, CI/CD, moduł ML) & otwarte \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% =====================================================================
+\section{Faza 1 --- Naprawa błędów krytycznych}
+\label{sec:faza1}
+
+\subsection{Dodanie plików \texttt{\_\_init\_\_.py}}
+
+\textbf{Problem}: Brak plików \texttt{\_\_init\_\_.py} uniemożliwia import pakietów Pythona.
+
+\textbf{Kroki}:
+\begin{enumerate}
+    \item Utworzyć puste pliki \texttt{\_\_init\_\_.py} w~katalogach: \texttt{src/}, \texttt{src/physics/}, \texttt{src/physics/state/}, \texttt{src/physics/noise/}, \texttt{src/physics/measurement/}.
+    \item W~\texttt{src/physics/\_\_init\_\_.py} dodać eksporty głównych klas (Listing~\ref{lst:init}).
+    \item Poprawić niespójne importy --- w~\texttt{coherent.py} i~\texttt{vacuum.py} jest import bezwzględny (\texttt{from src.physics.state.base}), a~w~pozostałych plikach względny (\texttt{from .base}). Ujednolicić do importów względnych.
+    \item Sprawdzić: \texttt{python -c "from src.physics import FockState"}.
+\end{enumerate}
+
+\begin{lstlisting}[caption={Proponowana zawartość \texttt{src/physics/\_\_init\_\_.py}.}, label={lst:init}]
+from .state.fock import FockState
+from .state.coherent import CoherentState
+from .state.cat import CatState
+from .state.vacuum import VacuumState
+from .state.thermal import ThermalState
+from .state.gkp import GKPState
+from .state.binomial import BinomialState
+from .noise.loss import LossChannel
+from .noise.mixture import MixtureChannel
+from .measurement.wigner import WignerMeasurement
+from .measurement.pipeline import MeasurementPipeline
+\end{lstlisting}
+
+\textbf{Kryterium zakończenia}: Polecenie \texttt{python -c "from src.physics import FockState"} wykonuje się bez błędów.
+
+\subsection{Zmiana nazwy \texttt{binomal.py} $\to$ \texttt{binomial.py}}
+
+\begin{enumerate}
+    \item \texttt{git mv src/physics/state/binomal.py src/physics/state/binomial.py}
+    \item Zaktualizować wszystkie importy.
+    \item \texttt{grep -r "binomal"} --- upewnić się, że nie ma starych odwołań.
+\end{enumerate}
+
+\subsection{Dodanie dziedziczenia w kanałach szumu}
+
+\begin{lstlisting}[caption={Naprawa dziedziczenia w \texttt{noise/loss.py} i \texttt{noise/mixture.py}.}, label={lst:fix-inheritance}]
+# PRZED:
+class LossChannel:
+# PO:
+from .base import QuantumChannel
+class LossChannel(QuantumChannel):
+
+# PRZED:
+class MixtureChannel:
+# PO:
+from .base import QuantumChannel
+class MixtureChannel(QuantumChannel):
+\end{lstlisting}
+
+\textbf{Kryterium}: \texttt{isinstance(LossChannel(32, 0.1), QuantumChannel)} zwraca \texttt{True}.
+
+\subsection{Naprawa generowania stanu dwumianowego}
+
+\begin{lstlisting}[caption={Naprawa błędu B2 w \texttt{generate.py}.}, label={lst:fix-binomial}]
+# PRZED (linia 44):
+state_binomial = (fock(N, n) + p * fock(N, n+1)).unit()
+
+# PO:
+from src.physics.state.binomial import BinomialState
+state_binomial = BinomialState(N=n, p=p, cutoff=N).ket()
+\end{lstlisting}
+
+\subsection{Weryfikacja wzorów matematycznych}
+
+\subsubsection{Stan dwumianowy}
+
+Obecna implementacja:
+\begin{equation}
+    \ket{\psi_\mathrm{bin}} = \sum_{n=0}^{N} \sqrt{\binom{N}{n}}\, p^{n/2}\, (1-p)^{(N-n)/2} \ket{n}
+    \label{eq:binomial}
+\end{equation}
+
+Kroki weryfikacji:
+\begin{enumerate}
+    \item Sprawdzić definicję w~Michael et~al.~\cite{michael2016}.
+    \item Potwierdzić normalizację: $\braket{\psi|\psi} = \sum \binom{N}{n} p^n (1-p)^{N-n} = 1$ (wzór dwumianowy Newtona).
+    \item Upewnić się, że \texttt{cutoff > N}.
+\end{enumerate}
+
+\subsubsection{Stan GKP}
+
+Idealny stan GKP to nieskończony grzebień delt Diraca~\cite{gottesman2001}:
+\begin{align}
+    \ket{0_\mathrm{GKP}} &\propto \sum_s \delta(q - 2s\sqrt{\pi}) \label{eq:gkp-ideal-0} \\
+    \ket{1_\mathrm{GKP}} &\propto \sum_s \delta(q - (2s+1)\sqrt{\pi}) \label{eq:gkp-ideal-1}
+\end{align}
+
+Przybliżenie skończonej energii zastosowane w~projekcie:
+\begin{equation}
+    \ket{\mathrm{GKP}} \propto \sum_s \exp\!\left(-\frac{(2s\sqrt{\pi})^2}{2\delta^2}\right) \hat{D}\!\left(\frac{2s\sqrt{\pi}}{\sqrt{2}}\right) \ket{0}
+    \label{eq:gkp-approx}
+\end{equation}
+
+Parametr $\delta$ kontroluje kompromis: mniejszy $\delta$ $\to$ bliżej ideału, ale większa wymagana energia. Na wykresie Wignera stan GKP wyróżnia się charakterystyczną \textbf{regularną siatką pików} (patrz Rysunek~\ref{fig:wigner-examples}).
+
+\textbf{Kroki weryfikacji}: Porównać z~rów.~(18) w~\cite{gottesman2001}. Sprawdzić konwencję QuTiP: $\hat{D}(\alpha)$ przesuwa o~$\mathrm{Re}(\alpha)$ w~$q$.
+
+% =====================================================================
+\section{Faza 2 --- Infrastruktura projektu}
+\label{sec:faza2}
+
+\subsection{Utworzenie \texttt{requirements.txt}}
+
+\begin{lstlisting}[style=tree, caption={Proponowany \texttt{requirements.txt}.}, label={lst:requirements}]
+qutip>=5.0
+numpy>=1.24
+scipy>=1.10
+matplotlib>=3.7
+Pillow>=10.0
+\end{lstlisting}
+
+Opcjonalnie \texttt{requirements-dev.txt} z~\texttt{pytest>=7.0} i~\texttt{opencv-python>=4.8}.
+
+\subsection{Parametryzacja ścieżek i stałych}
+
+\begin{lstlisting}[caption={Proponowany plik konfiguracyjny \texttt{config.py}.}, label={lst:config}]
+from dataclasses import dataclass
+from pathlib import Path
+
+@dataclass
+class GeneratorConfig:
+    output_dir: Path = Path("quantum_dataset")
+    cutoff: int = 32
+    resolution: int = 100
+    x_range: float = 5.0
+    n_samples: int = 10
+    cmap: str = "RdBu_r"
+\end{lstlisting}
+
+Dodać interfejs CLI z~\texttt{argparse}: \texttt{python generate.py --n-samples 100 --resolution 200}.
+
+\subsection{Ujednolicenie języka}
+
+Przetłumaczyć komentarze polskie na angielski (m.in.~w~\texttt{generate.py}, \texttt{gkp.py}).
+
+\textbf{Kryterium}: \texttt{grep -rn "[ąćęłńóśźż]" src/} nie zwraca wyników.
+
+\subsection{Rozbudowa \texttt{README.md}}
+
+Dodać sekcje: opis projektu, struktura, wymagania, instalacja, przykłady użycia, autorzy. Przykład szybkiego startu:
+
+\begin{lstlisting}[caption={Przykład użycia do umieszczenia w README.}, label={lst:quickstart}]
+from src.physics.state.fock import FockState
+from src.physics.measurement.wigner import WignerMeasurement
+
+state = FockState(n=3, cutoff=32)
+wm = WignerMeasurement(x_max=5, resolution=100)
+W = wm.measure(state.density_matrix())
+\end{lstlisting}
+
+% =====================================================================
+\section{Faza 3 --- Jakość kodu}
+\label{sec:faza3}
+
+\subsection{Adnotacje typów}
+
+\begin{lstlisting}[caption={Przykład adnotacji typów dla \texttt{FockState}.}, label={lst:types}]
+class FockState(QuantumState):
+    def __init__(self, n: int, cutoff: int) -> None:
+        self.n: int = n
+        self.cutoff: int = cutoff
+
+    def ket(self) -> Qobj:
+        return basis(self.cutoff, self.n)
+\end{lstlisting}
+
+Kryterium: \texttt{mypy src/} przechodzi bez błędów krytycznych (\texttt{mypy} to narzędzie do statycznego sprawdzania poprawności typów w~Pythonie --- wykrywa błędy typów bez uruchamiania kodu).
+
+\subsection{Docstringi}
+
+\begin{lstlisting}[caption={Przykładowy docstring z referencją do literatury (GKP).}, label={lst:docstring-gkp}]
+class GKPState(QuantumState):
+    """Approximate Gottesman-Kitaev-Preskill (GKP) state.
+
+    GKP state encodes a logical qubit in a harmonic oscillator,
+    protecting against small displacement errors in position (q)
+    and momentum (p). The ideal state is an infinite comb of
+    Dirac deltas spaced by 2*sqrt(pi). This implementation uses
+    a finite-energy approximation with a Gaussian envelope of
+    width delta:
+
+        |GKP> ~ sum_s exp(-2*pi*s**2 / delta**2) D(s*sqrt(2*pi)) |0>
+
+    Reference:
+        D. Gottesman, A. Kitaev, J. Preskill,
+        "Encoding a qubit in an oscillator",
+        Phys. Rev. A 64, 012310 (2001).
+        https://doi.org/10.1103/PhysRevA.64.012310
+
+    Args:
+        cutoff: Hilbert space dimension.
+        delta: Envelope width (smaller = more ideal).
+        grid_size: Number of peaks on each side.
+    """
+\end{lstlisting}
+
+\subsection{Walidacja danych wejściowych}
+
+\begin{lstlisting}[caption={Przykłady walidacji parametrów.}, label={lst:validation}]
+# BinomialState.__init__()
+if N < 0:
+    raise ValueError(f"N must be non-negative, got {N}")
+if not 0 <= p <= 1:
+    raise ValueError(f"p must be in [0, 1], got {p}")
+if cutoff <= N:
+    raise ValueError(f"cutoff ({cutoff}) must be > N ({N})")
+
+# LossChannel.__init__()
+if gamma < 0:
+    raise ValueError(f"gamma must be non-negative, got {gamma}")
+\end{lstlisting}
+
+\subsection{Obsługa błędów w skryptach}
+
+Dodać \texttt{try/except} w~\texttt{generate.py} i~sprawdzanie istnienia pliku w~\texttt{divider.py}.
+
+\subsection{Referencje do literatury}
+
+Dodać referencje w~docstringach: GKP~\cite{gottesman2001}, stan dwumianowy~\cite{michael2016}, kanał strat --- równanie Lindblada~\cite{lindblad1976, wiseman2009}.
+
+% =====================================================================
+\section{Faza 4 --- Testy}
+\label{sec:faza4}
+
+\subsection{Konfiguracja pytest}
+
+Utworzyć katalog \texttt{tests/} ze strukturą:
+
+\begin{lstlisting}[style=tree, caption={Struktura katalogu testów.}]
+tests/
+|-- __init__.py
+|-- conftest.py          -- wspolne fixtures
+|-- test_states.py       -- testy stanow
+|-- test_noise.py        -- testy kanalow szumu
+|-- test_validation.py   -- testy walidacji
+|-- test_measurement.py  -- testy pomiarow
+`-- test_pipeline.py     -- testy integracyjne
+\end{lstlisting}
+
+\subsection{Testy jednostkowe stanów}
+
+Każdy stan kwantowy musi spełniać warunki fizyczne z~sekcji~\ref{sec:pojecia}. Tabela~\ref{tab:testy-wspolne} przedstawia testy wspólne.
+
+\begin{table}[htbp]
+\centering
+\caption{Testy wspólne dla wszystkich stanów kwantowych.}
+\label{tab:testy-wspolne}
+\begin{tabular}{@{}p{3cm}p{3cm}p{4cm}p{4.5cm}@{}}
+\toprule
+\textbf{Test} & \textbf{Co sprawdzamy?} & \textbf{Dlaczego to ważne?} & \textbf{Kod} \\
+\midrule
+Normalizacja & $\braket{\psi|\psi} = 1$ & Prawdopodobieństwa = 1 & \texttt{state.ket().norm()} \\
+\addlinespace
+Ślad $\rho$ & $\mathrm{Tr}(\rho) = 1$ & Jak wyżej, dla macierzy & \texttt{rho.tr()} \\
+\addlinespace
+Hermitowskość & $\rho = \rho^\dagger$ & Wielkości obserwowalne muszą być rzeczywiste & \texttt{rho.isherm} \\
+\addlinespace
+Dodatnia półokreśloność & wartości własne $\geq 0$ & Prawdopodobieństwa nieujemne & \texttt{rho.eigenenergies()} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Testy specyficzne:
+
+\begin{lstlisting}[caption={Testy stanów kwantowych --- przykłady.}, label={lst:test-states}]
+class TestFockState:
+    def test_photon_number(self, cutoff):
+        """Stan Focka |n> powinien miec dokladnie n fotonow.
+        n_hat = a.dag() * a to operator liczby fotonow.
+        expect(n_hat, rho) oblicza wartosc oczekiwana <n>.
+        """
+        state = FockState(n=3, cutoff=cutoff)
+        rho = state.density_matrix()
+        a = destroy(cutoff)         # operator anihilacji
+        n_hat = a.dag() * a         # operator liczby fotonow
+        assert abs(expect(n_hat, rho) - 3.0) < 1e-10
+
+class TestCoherentState:
+    def test_mean_photon_number(self, cutoff):
+        """Stan koherentny |alpha> ma srednio |alpha|^2 fotonow."""
+        alpha = 2.0
+        state = CoherentState(alpha=alpha, cutoff=cutoff)
+        rho = state.density_matrix()
+        a = destroy(cutoff)
+        n_hat = a.dag() * a
+        assert abs(expect(n_hat, rho) - abs(alpha)**2) < 0.01
+
+class TestCatState:
+    def test_symmetry(self, cutoff):
+        """Parzysty kot zawiera tylko parzyste stany Focka.
+        |alpha> + |-alpha> -> tylko |0>, |2>, |4>, ...
+        """
+        state = CatState(alpha=2.0, cutoff=cutoff)
+        psi = state.ket()
+        for n in [1, 3, 5]:
+            overlap = abs(basis(cutoff, n).dag() * psi)[0][0]
+            assert abs(overlap) < 1e-10
+
+class TestThermalState:
+    def test_ket_raises(self, cutoff):
+        """Stan termiczny jest mieszany -- nie ma ketu."""
+        state = ThermalState(n_th=1.0, cutoff=cutoff)
+        with pytest.raises(NotImplementedError):
+            state.ket()
+\end{lstlisting}
+
+\subsection{Testy kanałów szumu}
+
+\begin{infobox}[Zasada testowania kanałów]
+Kanał szumu nie może złamać praw fizyki --- wynik musi nadal być poprawną macierzą gęstości (hermitowska, ślad = 1, wartości własne $\geq 0$).
+\end{infobox}
+
+\begin{lstlisting}[caption={Testy kanałów szumu --- przykłady.}, label={lst:test-noise}]
+class TestLossChannel:
+    def test_reduces_photon_number(self, cutoff):
+        """Straty zmniejszaja srednia liczbe fotonow."""
+        state = FockState(n=5, cutoff=cutoff)
+        channel = LossChannel(cutoff=cutoff, gamma=0.3)
+        rho_in = state.density_matrix()
+        rho_out = channel.apply(rho_in)
+        a = destroy(cutoff)
+        n_hat = a.dag() * a
+        assert expect(n_hat, rho_out) < expect(n_hat, rho_in)
+
+    def test_zero_loss_preserves_state(self, cutoff):
+        """Brak szumu (gamma=0) = brak zmian."""
+        state = CoherentState(alpha=1.0, cutoff=cutoff)
+        channel = LossChannel(cutoff=cutoff, gamma=0.0)
+        rho_in = state.density_matrix()
+        rho_out = channel.apply(rho_in)
+        assert abs((rho_in - rho_out).norm()) < 1e-6
+\end{lstlisting}
+
+\subsection{Testy walidacji}
+
+\begin{lstlisting}[caption={Testy funkcji \texttt{is\_physical()} --- wykrywanie macierzy niefizycznych.}, label={lst:test-validation}]
+class TestIsPhysical:
+    def test_negative_eigenvalue(self, cutoff):
+        """Macierz z ujemna wartoscia wlasna jest niefizyczna.
+        diag([1.5, -0.5, 0, ...]) -- slad=1, hermitowska,
+        ale -0.5 to ujemne prawdopodobienstwo.
+        """
+        mat = np.diag([1.5, -0.5] + [0.0] * (cutoff - 2))
+        rho_bad = Qobj(mat)
+        assert not is_physical(rho_bad)
+\end{lstlisting}
+
+\subsection{Testy integracyjne pipeline}
+
+\begin{lstlisting}[caption={Test integracyjny: wszystkie stany przez pipeline.}, label={lst:test-pipeline}]
+class TestMeasurementPipeline:
+    def test_all_states_produce_output(self, cutoff):
+        """Kazdy typ stanu daje poprawny obraz Wignera."""
+        wm = WignerMeasurement(x_max=5, resolution=32)
+        pipeline = MeasurementPipeline(measurement=wm)
+        states = [
+            FockState(n=1, cutoff=cutoff),
+            CoherentState(alpha=1.0, cutoff=cutoff),
+            CatState(alpha=2.0, cutoff=cutoff),
+            VacuumState(cutoff=cutoff),
+            GKPState(cutoff=cutoff, delta=0.4),
+            BinomialState(N=3, p=0.5, cutoff=cutoff),
+        ]
+        for state in states:
+            result = pipeline.run(state)
+            assert result.shape == (32, 32)
+            assert np.isfinite(result).all()
+\end{lstlisting}
+
+% =====================================================================
+\section{Faza 5 --- Rozwój funkcjonalności}
+\label{sec:faza5}
+
+\subsection{Nowe kanały szumu}
+
+Obecnie projekt ma 2~kanały szumu. Proponowane rozszerzenia:
+
+\begin{description}
+    \item[Kanał defazowania] --- niszczenie informacji o~fazie (kącie w~przestrzeni fazowej), bez utraty fotonów. Operator kolapsu: $\sqrt{\gamma}\,\hat{n}$. Analogia: światło w~ośrodku o~losowo zmieniającym się współczynniku załamania.
+    \item[Kanał wzmocnienia] --- dodawanie fotonów (odwrotność strat). Operator kolapsu: $\sqrt{\gamma}\,\hat{a}^\dagger$. Analogia: wzmacniacz optyczny.
+    \item[Kanał depolaryzacji] --- z~prawdopodobieństwem $p$ stan zastępowany ,,białym szumem'': $\rho \to (1-p)\rho + p\cdot \mathbf{I}/d$, gdzie $\mathbf{I}$ to macierz jednostkowa, a~$d$ --- wymiar przestrzeni Hilberta. Analogia: detektor dający losowy wynik.
+\end{description}
+
+\subsection{Generowanie stanów mieszanych}
+
+Rozszerzyć generator o~stany z~szumem (Fock + straty, kot + defazowanie). Dodać metadane CSV.
+
+\subsection{Konfiguracja CI/CD}
+
+\begin{lstlisting}[style=yaml, caption={Proponowany \texttt{.github/workflows/tests.yml}.}, label={lst:ci}]
+name: Tests
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - run: pip install -r requirements-dev.txt
+      - run: pytest tests/ -v --tb=short
+\end{lstlisting}
+
+\subsection{Moduł ML --- klasyfikator stanów}
+
+Główny cel projektu. Zadania ML:
+\begin{itemize}
+    \item \textbf{Klasyfikacja}: obraz Wignera $\to$ typ stanu (Fock / koherentny / kot / GKP / dwumianowy / termiczny),
+    \item \textbf{Rekonstrukcja}: zaszumiony obraz $\to$ czysty obraz,
+    \item \textbf{Estymacja parametrów}: obraz Wignera $\to$ parametry ($n$, $\alpha$, $p$).
+\end{itemize}
+
+\subsection{Optymalizacja wydajności}
+
+Zapamiętywanie (cache) wyników kosztownych obliczeń operatorów przesunięcia w~GKP za pomocą dekoratora \texttt{@lru\_cache} (mechanizm Pythona, który automatycznie zapamiętuje wyniki wywołań funkcji i~zwraca je bez ponownego obliczania). Zamiana pętli na operacje tablicowe NumPy (wektoryzacja --- szybsze niż pętla \texttt{for} w~Pythonie). Równoległe generowanie obrazów za pomocą modułu \texttt{multiprocessing}.
+
+% =====================================================================
+\section{Harmonogram i zależności między fazami}
+\label{sec:harmonogram}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+    phase/.style={draw, rounded corners, minimum width=3.2cm, minimum height=1cm, align=center, font=\small},
+    arr/.style={-{Stealth[length=3mm]}, thick},
+    node distance=1.5cm and 2cm
+]
+    \node[phase, fill=red!15] (f1) {Faza 1\\Błędy krytyczne\\$\sim$4\,godz.};
+    \node[phase, fill=orange!15, right=of f1] (f2) {Faza 2\\Infrastruktura\\$\sim$5\,godz.};
+    \node[phase, fill=yellow!15, right=of f2] (f3) {Faza 3\\Jakość kodu\\$\sim$11\,godz.};
+    \node[phase, fill=blue!15, below=of f2] (f4) {Faza 4\\Testy\\$\sim$10\,godz.};
+    \node[phase, fill=green!15, right=of f4] (f5) {Faza 5\\Rozwój\\otwarte};
+
+    \draw[arr] (f1) -- (f2);
+    \draw[arr] (f2) -- (f3);
+    \draw[arr] (f2) -- (f4);
+    \draw[arr] (f4) -- (f5);
+    \draw[arr, dashed] (f3) -- (f5);
+\end{tikzpicture}
+\caption{Zależności między fazami planu działań. Linia przerywana = zależność częściowa.}
+\label{fig:harmonogram}
+\end{figure}
+
+\textbf{Zależności}:
+\begin{itemize}
+    \item Faza 2 wymaga ukończenia Fazy 1 (pakiety muszą działać przed konfiguracją CLI).
+    \item Faza 4 wymaga ukończenia Fazy 1 i~częściowo Fazy 3 (walidacja potrzebna do testów).
+    \item Faza 3 i~4 mogą być realizowane częściowo równolegle.
+    \item Faza 5 wymaga stabilnej bazy z~Faz 1--4.
+\end{itemize}
+
+\textbf{Łączny szacowany nakład}: ok.~30 godzin roboczych (Fazy 1--4) + otwarte (Faza 5, głównie moduł ML).
+
+% =====================================================================
+\section{Diagramy architektury}
+\label{sec:diagramy}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+    class/.style={draw, rectangle, rounded corners=3pt, minimum width=3cm, minimum height=0.8cm, align=center, font=\small\ttfamily},
+    abstract/.style={class, fill=blue!10, font=\small\ttfamily\itshape},
+    concrete/.style={class, fill=green!10},
+    arr/.style={-{Stealth[length=2.5mm]}, thick},
+    inherit/.style={-{Triangle[length=3mm, open]}, thick},
+    node distance=0.8cm and 1.5cm
+]
+    % QuantumState hierarchy — all states inherit directly from QuantumState
+    \node[abstract] (qs) {QuantumState (ABC)};
+
+    % Row 1: 4 states
+    \node[concrete, below left=1.5cm and 3.5cm of qs] (vac) {VacuumState};
+    \node[concrete, below left=1.5cm and 1cm of qs] (fock) {FockState};
+    \node[concrete, below right=1.5cm and 1cm of qs] (coh) {CoherentState};
+    \node[concrete, below right=1.5cm and 3.5cm of qs] (cat) {CatState};
+    % Row 2: 3 states
+    \node[concrete, below=3cm of qs, xshift=-2.5cm] (therm) {ThermalState};
+    \node[concrete, below=3cm of qs] (gkp) {GKPState};
+    \node[concrete, below=3cm of qs, xshift=2.5cm] (binom) {BinomialState};
+
+    % All arrows go directly to QuantumState
+    \draw[inherit] (vac) -- (qs);
+    \draw[inherit] (fock) -- (qs);
+    \draw[inherit] (coh) -- (qs);
+    \draw[inherit] (cat) -- (qs);
+    \draw[inherit] (therm) -- (qs);
+    \draw[inherit] (gkp) -- (qs);
+    \draw[inherit] (binom) -- (qs);
+
+    % QuantumChannel hierarchy
+    \node[abstract, right=4cm of qs] (qc) {QuantumChannel (ABC)};
+    \node[concrete, below left=1cm and 0cm of qc] (loss) {LossChannel};
+    \node[concrete, below right=1cm and 0cm of qc] (mix) {MixtureChannel};
+
+    \draw[inherit] (loss) -- (qc);
+    \draw[inherit] (mix) -- (qc);
+
+    % Note about missing inheritance
+    \node[draw=red, dashed, thick, rounded corners, below=0.3cm of loss, font=\scriptsize\color{red}, text width=2.5cm, align=center] {brak dziedziczenia! (błąd B4)};
+
+    % Pipeline
+    \node[class, fill=yellow!15, below=3.5cm of qc] (pipe) {MeasurementPipeline};
+    \node[class, fill=yellow!15, left=1.5cm of pipe] (wigner) {WignerMeasurement};
+
+    \draw[arr] (pipe) -- node[above, font=\scriptsize]{measurement} (wigner);
+    \draw[arr, dashed] (pipe) -- ++(0, 1.5) node[right, font=\scriptsize]{noise (opcjonalnie)} -| ($(qc)+(0,-1)$);
+\end{tikzpicture}
+\caption{Diagram klas projektu. Wszystkie stany dziedziczą bezpośrednio po \texttt{QuantumState}. Klasy abstrakcyjne (ABC) na niebiesko, konkretne na zielono. Czerwona ramka oznacza wykryty błąd B4.}
+\label{fig:architektura}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+    block/.style={draw, rounded corners, minimum width=2.8cm, minimum height=1cm, align=center, font=\small},
+    arr/.style={-{Stealth[length=3mm]}, thick},
+    node distance=0.5cm and 1.8cm
+]
+    \node[block, fill=green!15] (state) {Stan kwantowy\\$\ket{\psi}$ / $\rho$};
+    \node[block, fill=red!15, right=of state] (noise) {Kanał szumu\\(opcjonalnie)};
+    \node[block, fill=blue!15, right=of noise] (measure) {Pomiar\\Wignera};
+    \node[block, fill=yellow!15, right=of measure] (image) {Obraz 2D\\(mapa cieplna)};
+
+    \draw[arr] (state) -- node[above, font=\scriptsize]{$\rho$} (noise);
+    \draw[arr] (noise) -- node[above, font=\scriptsize]{$\rho'$} (measure);
+    \draw[arr] (measure) -- node[above, font=\scriptsize]{$W(q,p)$} (image);
+\end{tikzpicture}
+\caption{Potok pomiarowy (pipeline): stan kwantowy $\to$ szum $\to$ pomiar Wignera $\to$ obraz.}
+\label{fig:pipeline}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}
+    % Placeholder for Wigner function examples
+    \foreach \i/\name in {0/Próżnia, 1/Fock $\ket{3}$, 2/Koherentny, 3/Kot, 4/GKP} {
+        \begin{scope}[xshift=\i*3.2cm]
+            \draw[fill=gray!10, rounded corners] (0,0) rectangle (2.8, 2.8);
+            \node[font=\scriptsize, align=center] at (1.4, 1.4) {[obraz Wignera\\do wygenerowania]};
+            \node[font=\scriptsize\bfseries, below] at (1.4, 0) {\name};
+        \end{scope}
+    }
+\end{tikzpicture}
+\caption{Przykładowe funkcje Wignera dla różnych stanów kwantowych (do wygenerowania z~kodu projektu). Każdy stan ma charakterystyczny, unikalny wzór --- to jest cecha, którą moduł ML będzie klasyfikował.}
+\label{fig:wigner-examples}
+\end{figure}
+
+% =====================================================================
+\section{Podsumowanie}
+\label{sec:podsumowanie}
+
+Projekt ma \textbf{solidne fundamenty architektoniczne} --- przejrzysty podział na moduły, poprawne użycie klas abstrakcyjnych i~trafny dobór bibliotek. Większość implementacji fizycznych jest poprawna.
+
+Główne braki to: \textbf{brak struktury pakietu} (\texttt{\_\_init\_\_.py}), \textbf{brak testów}, \textbf{brak dokumentacji} oraz \textbf{kilka błędów matematycznych} do zweryfikowania. Brakuje też części ML, która jest kluczowym celem projektu (klasyfikacja i~rekonstrukcja stanów).
+
+\textbf{Zalecana kolejność prac}: Faza~1 $\to$ Faza~2 $\to$ Fazy~3 i~4 równolegle $\to$ Faza~5 (patrz diagram zależności na Rysunku~\ref{fig:harmonogram}).
+
+\textbf{Szacowany łączny nakład pracy na Fazy 1--4}: ok.~30 godzin roboczych.
+
+% =====================================================================
+\printbibliography[title={Bibliografia}]
+
+\end{document}
