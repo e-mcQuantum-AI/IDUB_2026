@@ -19,7 +19,7 @@ Dr hab. Karol Bartkiewicz wraz z zespołem z Instytutu Spintroniki i Informacji 
 
 Projekt opiera się również na pracy Ahmed i współpracowników (*Physical Review Research*, 2021), w której zademonstrowano, że sieci neuronowe mogą osiągnąć dokładność klasyfikacji przekraczającą 98% oraz wierność rekonstrukcji powyżej 0,99 dla czystych stanów kwantowych, przy jednoczesnym przyspieszeniu procesu o 1–2 rzędy wielkości w porównaniu z metodami iteracyjnymi.
 
-Proponowany projekt ma na celu implementację i walidację metod głębokiego uczenia dla optycznych stanów kwantowych, obejmujących stany Focka, koherentne, termiczne, stany kota Schrödingera, binomialne oraz Gottesmana-Kitaeva-Preskilla, ze szczególnym uwzględnieniem robustności metod w obecności szumu eksperymentalnego.
+Proponowany projekt ma na celu implementację i walidację metod głębokiego uczenia dla optycznych stanów kwantowych, obejmujących stany Focka, koherentne, termiczne, stany kota Schrödingera, binomialne oraz Gottesmana-Kitaeva-Preskilla, ze szczególnym uwzględnieniem odporności metod w obecności szumu eksperymentalnego.
 
 ## 2. Cele projektu
 
@@ -79,7 +79,7 @@ Zadania szczegółowe:
 - Implementacja i testowanie klasycznych metod rekonstrukcji
 - Analiza zbieżności i wierności rekonstrukcji
 - Badanie wydajności dla stanów czystych i mieszanych
-- Testy robustności na szum
+- Testy odporności na szum
 
 **Rezultat**: Kompletny system tomografii z analizą porównawczą pokazującą przyspieszenie rekonstrukcji.
 
