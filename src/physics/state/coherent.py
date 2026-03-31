@@ -1,5 +1,5 @@
 from qutip import coherent
-from src.physics.state.base import QuantumState
+from .base import QuantumState
 
 class CoherentState(QuantumState):
 

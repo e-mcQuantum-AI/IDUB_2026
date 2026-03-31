@@ -1,7 +1,8 @@
 import numpy as np
-from qutip import basis, Qobj
+from qutip import Qobj
 from scipy.special import comb
 from .base import QuantumState
+
 
 class BinomialState(QuantumState):
 

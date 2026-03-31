@@ -1,5 +1,5 @@
 from qutip import basis
-from src.physics.state.base import QuantumState
+from .base import QuantumState
 
 class VacuumState(QuantumState):
 
