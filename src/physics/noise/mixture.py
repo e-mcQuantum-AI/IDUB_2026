@@ -1,4 +1,7 @@
-class MixtureChannel:
+from .base import QuantumChannel
+
+
+class MixtureChannel(QuantumChannel):
 
     def __init__(self, p: float, rho_other):
         self.p = p

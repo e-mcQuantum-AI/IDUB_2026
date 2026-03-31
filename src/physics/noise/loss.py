@@ -1,7 +1,9 @@
 from qutip import destroy, mesolve
 import numpy as np
+from .base import QuantumChannel
 
-class LossChannel:
+
+class LossChannel(QuantumChannel):
 
     def __init__(self, cutoff: int, gamma: float):
         self.cutoff = cutoff
