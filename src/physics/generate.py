@@ -1,62 +1,119 @@
-import os
-import numpy as np
+import argparse
 import matplotlib.pyplot as plt
-from physics import CatState, FockState, BinomialState, WignerMeasurement, CoherentState
+import numpy as np
+from pathlib import Path
+from . import WignerMeasurement, FockState, CatState, BinomialState, CoherentState, GeneratorConfig
 
 
-def setup_folders():
-    base_path = "quantum_dataset"
-    folders = ["clean"]
-    paths = {}
-    for f in folders:
-        path = os.path.join(base_path, f)
-        if not os.path.exists(path):
-            os.makedirs(path)
-        paths[f] = path
-    return paths
+def setup_folders(config: GeneratorConfig) -> dict[str, Path]:
+    clean_path = config.output_dir / "clean"
+    clean_path.mkdir(parents=True, exist_ok=True)
 
-def generate_dataset(n_samples=10, resolution=100):
-    paths = setup_folders()
-    N = 32
-    wigner = WignerMeasurement(x_max=5, resolution=resolution)
+    return {
+        "clean": clean_path,
+    }
+
+
+def generate_dataset(config: GeneratorConfig) -> None:
+    paths = setup_folders(config)
+
+    wm = WignerMeasurement(
+        x_max=config.x_range,
+        resolution=config.resolution,
+    )
+
     rng = np.random.default_rng()
-    
-    print(f"Generowanie {n_samples} par stanów...")
 
-    for i in range(n_samples):
+    print(f"Generowanie {config.n_samples} par stanów...")
+
+    for i in range(config.n_samples):
         # --- 1. STAN FOCKA ---
         n_photons: int = int(rng.integers(0, 8))
-        state_fock = FockState(n=n_photons, cutoff=N).ket()
+        state_fock = FockState(n=n_photons, cutoff=config.cutoff).ket()
 
-        # Czysty
-        w_clean = wigner.measure(state_fock)
-        plt.imsave(os.path.join(paths["clean"], f"fock_n{n_photons}_id{i}.png"), w_clean, cmap='RdBu_r')
+        w_clean = wm.measure(state_fock)
+        plt.imsave(paths["clean"] / f"fock_n{n_photons}_id{i}.png", w_clean, cmap=config.cmap)
 
         # --- 2. STAN KOTA ---
         alpha: complex = complex(rng.uniform(1.5, 3.5), rng.uniform(1.5, 3.5))
-        state_cat = CatState(alpha=alpha, cutoff=N).ket()
+        state_cat = CatState(alpha=alpha, cutoff=config.cutoff).ket()
 
-        # Czysty
-        w_cat_clean = wigner.measure(state_cat)
-        plt.imsave(os.path.join(paths["clean"], f"cat_a{alpha:.2f}_id{i}.png"), w_cat_clean, cmap='RdBu_r')     
+        w_cat_clean = wm.measure(state_cat)
+        plt.imsave(paths["clean"] / f"cat_a{alpha:.2f}_id{i}.png", w_cat_clean, cmap=config.cmap)
 
         # --- 3. STAN BINOMIALNY ---
         n: int = int(rng.integers(0, 8))
         p: float = float(rng.uniform(0.1, 0.9))
-        state_binomial = BinomialState(N=n, p=p, cutoff=N).ket()
+        state_binomial = BinomialState(N=n, p=p, cutoff=config.cutoff).ket()
 
-        # Czysty
-        w_binomial_clean = wigner.measure(state_binomial)
-        plt.imsave(os.path.join(paths["clean"], f"binomial_n{n}_p{p:.2f}_id{i}.png"), w_binomial_clean, cmap='RdBu_r')
+        w_binomial_clean = wm.measure(state_binomial)
+        plt.imsave(paths["clean"] / f"binomial_n{n}_p{p:.2f}_id{i}.png", w_binomial_clean, cmap=config.cmap)
 
         # --- 4. STAN KOHERENTNY ---
         alpha: complex = complex(rng.uniform(1.5, 3.5), rng.uniform(1.5, 3.5))
-        state_coherent = CoherentState(alpha=alpha, cutoff=N).ket()
+        state_coherent = CoherentState(alpha=alpha, cutoff=config.cutoff).ket()
 
-        # Czysty
-        w_coherent_clean = wigner.measure(state_coherent)
-        plt.imsave(os.path.join(paths["clean"], f"coherent_a{alpha:.2f}_id{i}.png"), w_coherent_clean, cmap='RdBu_r')
+        w_coherent_clean = wm.measure(state_coherent)
+        plt.imsave(paths["clean"] / f"coherent_a{alpha:.2f}_id{i}.png", w_coherent_clean, cmap=config.cmap)
 
-    print("Dane zapisano w folderze quantum_dataset/")
+    print(f"Dane zapisano w folderze {config.output_dir}")
 
-generate_dataset(n_samples=5)
+
+def parse_args() -> GeneratorConfig:
+    parser = argparse.ArgumentParser(description="Generowanie datasetu stanów kwantowych")
+
+    parser.add_argument(
+        "--output-dir",
+        type=Path,
+        default=Path("quantum_dataset"),
+        help="Folder wyjściowy",
+    )
+    parser.add_argument(
+        "--cutoff",
+        type=int,
+        default=32,
+        help="Cutoff przestrzeni Focka",
+    )
+    parser.add_argument(
+        "--resolution",
+        type=int,
+        default=100,
+        help="Rozdzielczość siatki Wignera",
+    )
+    parser.add_argument(
+        "--x-range",
+        type=float,
+        default=5.0,
+        help="Zakres osi x",
+    )
+    parser.add_argument(
+        "--n-samples",
+        type=int,
+        default=10,
+        help="Liczba próbek",
+    )
+    parser.add_argument(
+        "--cmap",
+        type=str,
+        default="RdBu_r",
+        help="Mapa kolorów matplotlib",
+    )
+
+    args = parser.parse_args()
+
+    return GeneratorConfig(
+        output_dir=args.output_dir,
+        cutoff=args.cutoff,
+        resolution=args.resolution,
+        x_range=args.x_range,
+        n_samples=args.n_samples,
+        cmap=args.cmap,
+    )
+
+
+def main():
+    config = parse_args()
+    generate_dataset(config)
+
+if __name__ == "__main__":
+    main()
