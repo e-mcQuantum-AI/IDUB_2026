@@ -4,22 +4,21 @@ from .base import QuantumState
 
 class GKPState(QuantumState):
 
-    def __init__(self, cutoff: int, delta: float = 0.3, grid_size: int = 5):
+    def __init__(self, cutoff: int, delta: float = 0.3, grid_size: int = 5) -> None:
         self.cutoff = cutoff
         self.delta = delta
         self.grid_size = grid_size  # number of peaks on both sides
 
     def ket(self) -> Qobj:
-
-        psi = Qobj([[0]] * self.cutoff)
-        vacuum = basis(self.cutoff, 0)
+        psi: Qobj = Qobj([[0]] * self.cutoff)
+        vacuum: Qobj = basis(self.cutoff, 0)
 
         for s in range(-self.grid_size, self.grid_size + 1):
 
             q_shift = 2 * s * np.sqrt(np.pi)
 
             # displacement operator
-            D = displace(self.cutoff, q_shift / np.sqrt(2))
+            D: Qobj = displace(self.cutoff, q_shift / np.sqrt(2))
 
             # Gaussian envelope
             weight = np.exp(- (2 * s * np.sqrt(np.pi))**2 / (2 * self.delta**2))
