@@ -1,3 +1,5 @@
+from typing import Any
+
 import numpy as np
 from qutip import Qobj
 from scipy.special import comb
@@ -6,12 +8,12 @@ from .base import QuantumState
 
 class BinomialState(QuantumState):
 
-    def __init__(self, N: int, p: float, cutoff: int):
+    def __init__(self, N: int, p: float, cutoff: int) -> None:
         self.N = N
         self.p = p
         self.cutoff = cutoff
 
-    def ket(self):
+    def ket(self) -> Qobj:
         vec = np.zeros(self.cutoff, dtype=complex)
 
         for n in range(self.N + 1):

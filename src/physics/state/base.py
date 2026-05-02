@@ -8,5 +8,5 @@ class QuantumState(ABC):
         pass
 
     def density_matrix(self) -> Qobj:
-        psi = self.ket()
+        psi: Qobj = self.ket()
         return psi * psi.dag()

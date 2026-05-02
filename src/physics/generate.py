@@ -35,11 +35,11 @@ def generate_dataset(config: GeneratorConfig) -> None:
         plt.imsave(paths["clean"] / f"fock_n{n_photons}_id{i}.png", w_clean, cmap=config.cmap)
 
         # --- 2. CAT STATE ---
-        alpha: complex = complex(rng.uniform(1.5, 3.5), rng.uniform(1.5, 3.5))
-        state_cat = CatState(alpha=alpha, cutoff=config.cutoff).ket()
+        alpha_cat: complex = complex(rng.uniform(1.5, 3.5), rng.uniform(1.5, 3.5))
+        state_cat = CatState(alpha=alpha_cat, cutoff=config.cutoff).ket()
 
         w_cat_clean = wm.measure(state_cat)
-        plt.imsave(paths["clean"] / f"cat_a{alpha:.2f}_id{i}.png", w_cat_clean, cmap=config.cmap)
+        plt.imsave(paths["clean"] / f"cat_a{alpha_cat:.2f}_id{i}.png", w_cat_clean, cmap=config.cmap)
 
         # --- 3. BINOMIAL STATE ---
         n: int = int(rng.integers(0, 8))
@@ -50,11 +50,11 @@ def generate_dataset(config: GeneratorConfig) -> None:
         plt.imsave(paths["clean"] / f"binomial_n{n}_p{p:.2f}_id{i}.png", w_binomial_clean, cmap=config.cmap)
 
         # --- 4. COHERENT STATE ---
-        alpha: complex = complex(rng.uniform(1.5, 3.5), rng.uniform(1.5, 3.5))
-        state_coherent = CoherentState(alpha=alpha, cutoff=config.cutoff).ket()
+        alpha_coherent: complex = complex(rng.uniform(1.5, 3.5), rng.uniform(1.5, 3.5))
+        state_coherent = CoherentState(alpha=alpha_coherent, cutoff=config.cutoff).ket()
 
         w_coherent_clean = wm.measure(state_coherent)
-        plt.imsave(paths["clean"] / f"coherent_a{alpha:.2f}_id{i}.png", w_coherent_clean, cmap=config.cmap)
+        plt.imsave(paths["clean"] / f"coherent_a{alpha_coherent:.2f}_id{i}.png", w_coherent_clean, cmap=config.cmap)
 
     print(f"Dane zapisano w folderze {config.output_dir}")
 

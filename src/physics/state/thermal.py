@@ -4,11 +4,11 @@ from .base import QuantumState
 
 class ThermalState(QuantumState):
 
-    def __init__(self, n_th: float, cutoff: int):
+    def __init__(self, n_th: float, cutoff: int) -> None:
         self.n_th = n_th
         self.cutoff = cutoff
 
-    def ket(self):
+    def ket(self) -> Qobj:
         raise NotImplementedError("Thermal state is mixed.")
 
     def density_matrix(self) -> Qobj:
