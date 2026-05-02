@@ -33,93 +33,7 @@ Proponowany projekt ma na celu implementację i walidację metod głębokiego uc
 4. Badanie odporności na różne typy szumu eksperymentalnego
 5. Interpretacja decyzji sieci metodą Grad-CAM w celu optymalizacji strategii pomiarowych
 
-## 3. Zadania naukowe i harmonogram (36 tygodni, 4 osoby)
-
-### Faza I: Infrastruktura i fundamenty teoretyczne (Tygodnie 1–8)
-
-Osoby zaangażowane: 4 (wszyscy członkowie zespołu)
-
-- Studia literaturowe: analiza prac zespołu prof. Bartkiewicza i Ahmed et al.
-- Konfiguracja środowiska (Python, TensorFlow/PyTorch, QuTiP)
-- Implementacja symulatorów stanów kwantowych
-- Generacja pierwszych zbiorów danych uczących (>10 000 stanów)
-- Implementacja modeli szumu: strata fotonów, szum gaussowski, mieszanie stanów
-
-**Rezultat**: Działające środowisko symulacyjne, wstępna baza danych, raport z analizy literatury.
-
-### Faza II: Klasyfikacja stanów kwantowych (Tygodnie 9–18)
-
-Podział zadań:
-- **Osoba 1–2**: Projektowanie i implementacja architektury CNN
-- **Osoba 3**: Rozszerzenie bazy danych, augmentacja danych
-- **Osoba 4**: Implementacja metryk ewaluacyjnych, wizualizacja wyników
-
-Zadania szczegółowe:
-- Projektowanie architektury: warstwy konwolucyjne, warstwy łączące, warstwy w pełni połączone
-- Uczenie klasyfikatora z walidacją krzyżową
-- Optymalizacja hiperparametrów
-- Analiza wydajności: macierze pomyłek, krzywe ROC
-- Badanie wpływu szumu na dokładność klasyfikacji
-- Implementacja i zastosowanie Grad-CAM
-
-**Rezultat**: Działający klasyfikator z pełną dokumentacją wydajności, analiza obszarów decyzyjnych sieci.
-
-### Faza III: Rekonstrukcja stanów — warunkowa generatywna sieć przeciwstawna (Tygodnie 19–30)
-
-Podział zadań:
-- **Osoba 1–2**: Implementacja sieci generującej z warstwami kwantowymi
-- **Osoba 3**: Implementacja sieci dyskryminującej
-- **Osoba 4**: Porównanie z metodami klasycznymi (MLE, APG)
-
-Zadania szczegółowe:
-- Projektowanie niestandardowych warstw:
-  - Warstwa macierzy gęstości (hermitowska, dodatnio określona, ślad jednostkowy)
-  - Warstwa wartości oczekiwanych (reguła Borna)
-- Uczenie antagonistyczne z różnymi funkcjami kosztu
-- Implementacja i testowanie klasycznych metod rekonstrukcji
-- Analiza zbieżności i wierności rekonstrukcji
-- Badanie wydajności dla stanów czystych i mieszanych
-- Testy odporności na szum
-
-**Rezultat**: Kompletny system tomografii z analizą porównawczą pokazującą przyspieszenie rekonstrukcji.
-
-### Faza IV: Analiza, walidacja i dokumentacja (Tygodnie 31–36)
-
-Osoby zaangażowane: 4
-
-- Kompleksowa analiza wyników
-- Porównanie z podejściem wielokopijnym prof. Bartkiewicza
-- Testy na symulowanych danych eksperymentalnych
-- Przygotowanie publikacji naukowej
-- Dokumentacja kodu i repozytorium
-- Przygotowanie prezentacji i plakatu konferencyjnego
-
-**Rezultat**: Gotowa publikacja, udokumentowany kod, prezentacja.
-
-## 4. Powiązanie z badaniami opiekuna projektu
-
-Projekt stanowi kontynuację badań dr hab. Karola Bartkiewicza, prof. UAM:
-
-- **Kwantowe uczenie maszynowe**: nawiązanie do synergicznego kwantowego generatywnego uczenia (*Scientific Reports*, 2023)
-- **Tomografia wspierana uczeniem**: rozwinięcie metod z 67% redukcją wymagań pomiarowych (Tulewicz, Bartkiewicz et al., 2024)
-- **Kwantowe metody jądrowe**: związek z eksperymentalną realizacją w skończonej przestrzeni cech (*Scientific Reports*, 2020)
-- **Detekcja splątania**: wykorzystanie doświadczeń z projektowania świadków splątania sieciami neuronowymi (*PRL*, 2019)
-
-## 5. Spodziewane rezultaty
-
-### Rezultaty naukowe
-- Artykuł w czasopiśmie JCR (*Physical Review A*, *Quantum Science and Technology*, *Scientific Reports*)
-- Referat na konferencji międzynarodowej (IEEE QCE, QIP) lub krajowej (KSKIK)
-- Poster konferencyjny
-
-### Rezultaty techniczne
-- Publicznie dostępne repozytorium z implementacjami sieci neuronowych, narzędziami symulacyjnymi i dokumentacją
-- Interaktywne narzędzia wizualizacyjne (funkcja Wignera, macierze gęstości, mapy aktywacji)
-
-### Rezultaty edukacyjne
-Uczestnicy nabędą kompetencje w zakresie implementacji algorytmów uczenia maszynowego, symulacji układów kwantowych i analizy danych pomiarowych.
-
-## 6. Struktura repozytorium
+## 3. Struktura repozytorium
 
 ```
 src/
@@ -133,7 +47,66 @@ src/
 └── ml/              — moduł uczenia maszynowego (planowany)
 ```
 
-## 7. Wybrane publikacje opiekuna
+## 4. Wymagania
+
+```
+contourpy==1.3.3
+cycler==0.12.1
+fonttools==4.62.1
+kiwisolver==1.5.0
+matplotlib==3.10.8
+numpy==2.4.4
+packaging==26.0
+pillow==12.1.1
+pyparsing==3.3.2
+python-dateutil==2.9.0.post0
+qutip==5.2.3
+scipy==1.17.1
+six==1.17.0
+```
+
+## 5. Instalacja
+
+```pip install -r requirements.txt```
+
+## 6. Przykłady użycia
+
+### Python API
+
+```
+from src.physics.state.fock import FockState
+from src.physics.measurement.wigner import WignerMeasurement
+
+state = FockState(n=3, cutoff=32)
+wm = WignerMeasurement(x_max=5, resolution=100)
+
+W = wm.measure(state.density_matrix())
+```
+
+### CLI
+
+```python generate.py --help```
+
+## 7. Dostępne stany
+
+- Stan dwumianowy
+- Stan kota Schrödingera
+- Stan koherentny
+- Stan Focka
+- Stan GKP
+- Stan termiczny
+- Stan próżni
+
+## 8. Autorzy
+
+- Karol Bartkiewicz
+- Franciszek Grzywa
+- Sebastian Dolata
+- Mieszko Stryjski
+- Julian Szamotuła
+- Piotr Stećków
+
+## 9. Wybrane publikacje opiekuna
 
 1. P. Tulewicz, K. Bartkiewicz, A. Miranowicz, F. Nori, *"Resource-Efficient Quantum Correlation Measurement: A Multicopy Neural Network Approach"*, arXiv:2411.05745 (2024)
 2. K. Bartkiewicz, P. Tulewicz, J. Roik, K. Lemr, *"Synergic quantum generative machine learning"*, Scientific Reports **13**, 12880 (2023)
