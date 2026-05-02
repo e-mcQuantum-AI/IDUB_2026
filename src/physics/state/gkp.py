@@ -7,7 +7,7 @@ class GKPState(QuantumState):
     def __init__(self, cutoff: int, delta: float = 0.3, grid_size: int = 5):
         self.cutoff = cutoff
         self.delta = delta
-        self.grid_size = grid_size  # liczba pików po obu stronach
+        self.grid_size = grid_size  # number of peaks on both sides
 
     def ket(self):
 
@@ -18,10 +18,10 @@ class GKPState(QuantumState):
 
             q_shift = 2 * s * np.sqrt(np.pi)
 
-            # operator przesunięcia
+            # displacement operator
             D = displace(self.cutoff, q_shift / np.sqrt(2))
 
-            # envelope Gaussowski
+            # Gaussian envelope
             weight = np.exp(- (2 * s * np.sqrt(np.pi))**2 / (2 * self.delta**2))
 
             psi += weight * D * vacuum
