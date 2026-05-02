@@ -1,4 +1,4 @@
-from qutip import destroy, mesolve
+from qutip import destroy, mesolve, Qobj
 import numpy as np
 from .base import QuantumChannel
 
@@ -9,8 +9,8 @@ class LossChannel(QuantumChannel):
         self.cutoff = cutoff
         self.gamma = gamma
 
-    def apply(self, rho):
-        a = destroy(self.cutoff)
+    def apply(self, rho: Qobj) -> Qobj:
+        a: Qobj = destroy(self.cutoff)
         result = mesolve(
             H=0 * a.dag() * a,
             rho0=rho,

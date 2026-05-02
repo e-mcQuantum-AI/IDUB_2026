@@ -1,5 +1,5 @@
 import numpy as np
-from qutip import displace, basis
+from qutip import displace, basis, Qobj
 from .base import QuantumState
 
 class GKPState(QuantumState):
@@ -9,9 +9,9 @@ class GKPState(QuantumState):
         self.delta = delta
         self.grid_size = grid_size  # number of peaks on both sides
 
-    def ket(self):
+    def ket(self) -> Qobj:
 
-        psi = 0
+        psi = Qobj([[0]] * self.cutoff)
         vacuum = basis(self.cutoff, 0)
 
         for s in range(-self.grid_size, self.grid_size + 1):
