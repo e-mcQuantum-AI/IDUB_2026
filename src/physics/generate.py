@@ -27,21 +27,21 @@ def generate_dataset(config: GeneratorConfig) -> None:
     print(f"Generowanie {config.n_samples} par stanów...")
 
     for i in range(config.n_samples):
-        # --- 1. STAN FOCKA ---
+        # --- 1. FOCK STATE ---
         n_photons: int = int(rng.integers(0, 8))
         state_fock = FockState(n=n_photons, cutoff=config.cutoff).ket()
 
         w_clean = wm.measure(state_fock)
         plt.imsave(paths["clean"] / f"fock_n{n_photons}_id{i}.png", w_clean, cmap=config.cmap)
 
-        # --- 2. STAN KOTA ---
+        # --- 2. CAT STATE ---
         alpha: complex = complex(rng.uniform(1.5, 3.5), rng.uniform(1.5, 3.5))
         state_cat = CatState(alpha=alpha, cutoff=config.cutoff).ket()
 
         w_cat_clean = wm.measure(state_cat)
         plt.imsave(paths["clean"] / f"cat_a{alpha:.2f}_id{i}.png", w_cat_clean, cmap=config.cmap)
 
-        # --- 3. STAN BINOMIALNY ---
+        # --- 3. BINOMIAL STATE ---
         n: int = int(rng.integers(0, 8))
         p: float = float(rng.uniform(0.1, 0.9))
         state_binomial = BinomialState(N=n, p=p, cutoff=config.cutoff).ket()
@@ -49,7 +49,7 @@ def generate_dataset(config: GeneratorConfig) -> None:
         w_binomial_clean = wm.measure(state_binomial)
         plt.imsave(paths["clean"] / f"binomial_n{n}_p{p:.2f}_id{i}.png", w_binomial_clean, cmap=config.cmap)
 
-        # --- 4. STAN KOHERENTNY ---
+        # --- 4. COHERENT STATE ---
         alpha: complex = complex(rng.uniform(1.5, 3.5), rng.uniform(1.5, 3.5))
         state_coherent = CoherentState(alpha=alpha, cutoff=config.cutoff).ket()
 
