@@ -49,35 +49,43 @@ def generate_dataset(config: GeneratorConfig) -> None:
 
     print(f"Generowanie {config.n_samples} par stanów...")
 
-    for i in range(config.n_samples):
-        # --- 1. FOCK STATE ---
-        n_photons: int = int(rng.integers(0, 8))
-        state_fock = FockState(n=n_photons, cutoff=config.cutoff).ket()
+    try:
+        for i in range(config.n_samples):
+            # --- 1. FOCK STATE ---
+            n_photons: int = int(rng.integers(0, 8))
+            state_fock = FockState(n=n_photons, cutoff=config.cutoff).ket()
 
-        w_clean = wm.measure(state_fock)
-        plt.imsave(paths["clean"] / f"fock_n{n_photons}_id{i}.png", w_clean, cmap=config.cmap)
+            w_clean = wm.measure(state_fock)
+            plt.imsave(paths["clean"] / f"fock_n{n_photons}_id{i}.png", w_clean, cmap=config.cmap)
 
-        # --- 2. CAT STATE ---
-        alpha_cat: complex = complex(rng.uniform(1.5, 3.5), rng.uniform(1.5, 3.5))
-        state_cat = CatState(alpha=alpha_cat, cutoff=config.cutoff).ket()
+            # --- 2. CAT STATE ---
+            alpha_cat: complex = complex(rng.uniform(1.5, 3.5), rng.uniform(1.5, 3.5))
+            state_cat = CatState(alpha=alpha_cat, cutoff=config.cutoff).ket()
 
-        w_cat_clean = wm.measure(state_cat)
-        plt.imsave(paths["clean"] / f"cat_a{alpha_cat:.2f}_id{i}.png", w_cat_clean, cmap=config.cmap)
+            w_cat_clean = wm.measure(state_cat)
+            plt.imsave(paths["clean"] / f"cat_a{alpha_cat:.2f}_id{i}.png", w_cat_clean, cmap=config.cmap)
 
-        # --- 3. BINOMIAL STATE ---
-        n: int = int(rng.integers(0, 8))
-        p: float = float(rng.uniform(0.1, 0.9))
-        state_binomial = BinomialState(N=n, p=p, cutoff=config.cutoff).ket()
+            # --- 3. BINOMIAL STATE ---
+            n: int = int(rng.integers(0, 8))
+            p: float = float(rng.uniform(0.1, 0.9))
+            state_binomial = BinomialState(N=n, p=p, cutoff=config.cutoff).ket()
 
-        w_binomial_clean = wm.measure(state_binomial)
-        plt.imsave(paths["clean"] / f"binomial_n{n}_p{p:.2f}_id{i}.png", w_binomial_clean, cmap=config.cmap)
+            w_binomial_clean = wm.measure(state_binomial)
+            plt.imsave(paths["clean"] / f"binomial_n{n}_p{p:.2f}_id{i}.png", w_binomial_clean, cmap=config.cmap)
 
-        # --- 4. COHERENT STATE ---
-        alpha_coherent: complex = complex(rng.uniform(1.5, 3.5), rng.uniform(1.5, 3.5))
-        state_coherent = CoherentState(alpha=alpha_coherent, cutoff=config.cutoff).ket()
+            # --- 4. COHERENT STATE ---
+            alpha_coherent: complex = complex(rng.uniform(1.5, 3.5), rng.uniform(1.5, 3.5))
+            state_coherent = CoherentState(alpha=alpha_coherent, cutoff=config.cutoff).ket()
 
-        w_coherent_clean = wm.measure(state_coherent)
-        plt.imsave(paths["clean"] / f"coherent_a{alpha_coherent:.2f}_id{i}.png", w_coherent_clean, cmap=config.cmap)
+            w_coherent_clean = wm.measure(state_coherent)
+            plt.imsave(paths["clean"] / f"coherent_a{alpha_coherent:.2f}_id{i}.png", w_coherent_clean, cmap=config.cmap)
+
+    except ValueError as e:
+        raise ValueError(f"Błąd wartości podczas generowania datasetu: {e}")
+    except OSError as e:
+        raise OSError(f"Błąd systemu plików podczas zapisu datasetu: {e}")
+    except Exception as e:
+        raise RuntimeError(f"Nieoczekiwany błąd podczas generowania datasetu: {e}")
 
     print(f"Dane zapisano w folderze {config.output_dir}")
 
@@ -141,8 +149,18 @@ def parse_args() -> GeneratorConfig:
 
 def main():
     """CLI entry point for dataset generation."""
-    config = parse_args()
-    generate_dataset(config)
+    try:
+        config = parse_args()
+        generate_dataset(config)
+    except FileNotFoundError as e:
+        print(f"[FileNotFoundError] {e}")
+    except ValueError as e:
+        print(f"[ValueError] {e}")
+    except OSError as e:
+        print(f"[OSError] {e}")
+    except RuntimeError as e:
+        print(f"[RuntimeError] {e}")
+
 
 if __name__ == "__main__":
     main()
