@@ -24,24 +24,21 @@ def divide_on_squares(img_name: str, x: int, output_directory: str = "divided") 
     Raises:
         FileNotFoundError: If the input image does not exist.
         ValueError: If x <= 0.
+        OSError: For filesystem or image I/O related issues.
     """
     if x <= 0:
         raise ValueError("x must be positive.")
 
     input_path = os.path.join("quantum_dataset", "clean", img_name)
-    if not os.path.exists(input_path):
-        raise FileNotFoundError(f"Image not found: {input_path}")
 
-    name: str = os.path.splitext(img_name)[0]
-    output_dir: str = f"{output_directory}/{name}"
-
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir)
+    name = os.path.splitext(img_name)[0]
+    output_dir = os.path.join(output_directory, name)
+    os.makedirs(output_dir, exist_ok=True)
 
     img = Image.open(input_path)
     width, height = img.size
 
-    counter: int = 0
+    counter = 0
 
     for i in range(0, height, x):
         for j in range(0, width, x):
@@ -49,7 +46,7 @@ def divide_on_squares(img_name: str, x: int, output_directory: str = "divided") 
                 box = (j, i, j + x, i + x)
                 fragment = img.crop(box)
 
-                file_name: str = f"{name}_{i // x}_{j // x}.png"
+                file_name = f"{name}_{i // x}_{j // x}.png"
                 fragment.save(os.path.join(output_dir, file_name))
                 counter += 1
 
@@ -57,4 +54,11 @@ def divide_on_squares(img_name: str, x: int, output_directory: str = "divided") 
 
 
 if __name__ == "__main__":
-    divide_on_squares("fock_n0_id0.png", 50)
+    try:
+        divide_on_squares("fock_n0_id0.png", 50)
+    except FileNotFoundError as e:
+        print(f"[File error] {e}")
+    except ValueError as e:
+        print(f"[Value error] {e}")
+    except OSError as e:
+        print(f"[OS error] {e}")
