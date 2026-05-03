@@ -1,11 +1,15 @@
 """
-CLI wrapper for dataset generation.
+CLI entrypoint for quantum dataset generation.
 
-Allows running the generator from the project root, e.g.:
+This script provides a convenient wrapper for running the dataset
+generation pipeline from the project root.
 
+Example:
     python generate.py --help
 """
 
 from src.physics.generate import main
 
-main()
+
+if __name__ == "__main__":
+    main()
