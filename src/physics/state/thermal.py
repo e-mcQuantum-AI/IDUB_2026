@@ -39,9 +39,9 @@ class ThermalState(QuantumState):
             cutoff (int): Hilbert space dimension.
         """
         if n_th < 0:
-            raise ValueError("n_th must be non-negative.")
+            raise ValueError(f"n_th must be non-negative, got {n_th}")
         if cutoff <= 0:
-            raise ValueError("cutoff must be positive.")
+            raise ValueError(f"cutoff must be positive, got {cutoff}")
 
         self.n_th = n_th
         self.cutoff = cutoff

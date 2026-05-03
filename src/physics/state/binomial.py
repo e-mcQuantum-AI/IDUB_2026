@@ -49,10 +49,12 @@ class BinomialState(QuantumState):
             p (float): Probability parameter.
             cutoff (int): Hilbert space dimension.
         """
+        if N < 0:
+            raise ValueError(f"N must be non-negative, got {N}")
         if not (0.0 <= p <= 1.0):
-            raise ValueError("p must be in [0, 1].")
+            raise ValueError (f"p must be in [0 , 1], got {p}")
         if N >= cutoff:
-            raise ValueError("N must be smaller than cutoff.")
+            raise ValueError (f"cutoff ({ cutoff }) must be > N ({N})")
 
         self.N = N
         self.p = p

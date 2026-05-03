@@ -51,11 +51,11 @@ class GKPState(QuantumState):
             grid_size (int): Number of grid peaks per side.
         """
         if cutoff <= 0:
-            raise ValueError("cutoff must be positive.")
+            raise ValueError(f"cutoff must be positive, got {cutoff}")
         if delta <= 0:
-            raise ValueError("delta must be positive.")
+            raise ValueError(f"delta must be positive, got {delta}")
         if grid_size <= 0:
-            raise ValueError("grid_size must be positive.")
+            raise ValueError(f"grid_size must be positive, got {grid_size}")
 
         self.cutoff = cutoff
         self.delta = delta
