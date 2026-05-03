@@ -35,7 +35,7 @@ class MixtureChannel(QuantumChannel):
             rho_other (Qobj): Reference density matrix.
         """
         if not (0.0 <= p <= 1.0):
-            raise ValueError("p must be in [0, 1].")
+            raise ValueError(f"p must be in [0, 1], got {p}")
 
         self.p = p
         self.rho_other = rho_other

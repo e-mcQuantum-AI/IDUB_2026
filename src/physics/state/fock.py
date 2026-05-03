@@ -36,9 +36,9 @@ class FockState(QuantumState):
             cutoff (int): Hilbert space dimension.
         """
         if cutoff <= 0:
-            raise ValueError("cutoff must be positive.")
+            raise ValueError(f"cutoff must be positive, got {cutoff}")
         if not (0 <= n < cutoff):
-            raise ValueError("n must satisfy 0 <= n < cutoff.")
+            raise ValueError(f"n must satisfy 0 <= n < cutoff, got {n}")
 
         self.n = n
         self.cutoff = cutoff

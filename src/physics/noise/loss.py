@@ -48,7 +48,7 @@ class LossChannel(QuantumChannel):
             ValueError: If gamma is negative.
         """
         if gamma < 0:
-            raise ValueError("gamma must be non-negative.")
+            raise ValueError(f"gamma must be non-negative, got {gamma}")
 
         self.cutoff = cutoff
         self.gamma = gamma

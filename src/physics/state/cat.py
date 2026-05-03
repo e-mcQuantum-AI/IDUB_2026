@@ -37,7 +37,7 @@ class CatState(QuantumState):
             cutoff (int): Hilbert space dimension.
         """
         if cutoff <= 0:
-            raise ValueError("cutoff must be positive.")
+            raise ValueError(f"cutoff must be positive, got {cutoff}")
 
         self.alpha = alpha
         self.cutoff = cutoff
