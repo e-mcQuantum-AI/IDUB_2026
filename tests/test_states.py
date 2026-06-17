@@ -10,7 +10,7 @@ from src.physics import (
     BinomialState,
     GKPState,
 )
-from validation import is_physical
+from src.physics.validation import is_physical
 
 pure_state_factories = [
     lambda c: FockState(n=3, cutoff=c),
