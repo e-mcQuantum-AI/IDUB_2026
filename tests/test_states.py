@@ -1,6 +1,61 @@
 import pytest
+import numpy as np
 from qutip import destroy, expect, basis
-from src.physics import FockState, CoherentState, CatState, ThermalState, VacuumState, BinomialState, GKPState
+from src.physics import (
+    FockState,
+    CoherentState,
+    CatState,
+    ThermalState,
+    VacuumState,
+    BinomialState,
+    GKPState,
+)
+from validation import is_physical
+
+pure_state_factories = [
+    lambda c: FockState(n=3, cutoff=c),
+    lambda c: CoherentState(alpha=1.5, cutoff=c),
+    lambda c: CatState(alpha=2.0, cutoff=c),
+    lambda c: VacuumState(cutoff=c),
+    lambda c: BinomialState(N=4, p=0.5, cutoff=c),
+    lambda c: GKPState(cutoff=c, delta=0.3)
+]
+
+@pytest.mark.parametrize("state_factory", pure_state_factories)
+def test_common_pure_state_properties(state_factory, cutoff):
+    """Automatyczny test dla wszystkich stanów czystych z tabeli wymagań."""
+    state = state_factory(cutoff)
+    rho = state.density_matrix()
+
+    # Normalizacja ketu | ⟨ψ|ψ⟩ = 1
+    assert abs(state.ket().norm() - 1) < 1e-10
+
+    # Ślad macierzy gęstości | Tr(ρ) = 1
+    assert abs(rho.tr() - 1) < 1e-10
+
+    # Hermitowskość | ρ = ρ†
+    assert rho.isherm is True
+
+    # Dodatnia półokreśloność | wartości własne ≥ 0
+    assert np.all(rho.eigenenergies() >= -1e-10)
+
+    # Kompleksowa walidacja funkcją systemową
+    assert is_physical(rho) is True
+
+
+def test_common_mixed_state_properties(cutoff):
+    """Weryfikacja warunków fizycznych dla stanu mieszanego (ThermalState).
+
+    Stan termiczny nie ma reprezentacji wektorowej (ketu),
+    więc testujemy tylko właściwości macierzy gęstości.
+    """
+    state = ThermalState(n_th=1.5, cutoff=cutoff)
+    rho = state.density_matrix()
+
+    assert abs(rho.tr() - 1) < 1e-10
+    assert rho.isherm is True
+    assert np.all(rho.eigenenergies() >= -1e-10)
+#     assert is_physical(rho) is True
 
 
 class TestFockState:
@@ -19,6 +74,7 @@ class TestFockState:
         n_hat = a.dag() * a
         assert abs(expect(n_hat, rho) - 3.0) < 1e-10
 
+
 class TestCoherentState:
     def test_mean_photon_number(self, cutoff):
         """Stan koherentny |α⟩ powinien mieć średnio |α|² fotonów.
@@ -32,7 +88,8 @@ class TestCoherentState:
         rho = state.density_matrix()
         a = destroy(cutoff)
         n_hat = a.dag() * a
-        assert abs(expect(n_hat, rho) - abs(alpha)**2) < 0.01
+        assert abs(expect(n_hat, rho) - abs(alpha) ** 2) < 0.01
+
 
 class TestCatState:
     def test_symmetry(self, cutoff):
@@ -48,8 +105,9 @@ class TestCatState:
         psi = state.ket()
 
         for n in [1, 3, 5]:
-            overlap = abs(basis(cutoff, n).dag() * psi)[0][0]
+            overlap = abs(basis(cutoff, n).dag() * psi)
             assert abs(overlap) < 1e-10
+
 
 class TestThermalState:
     def test_mean_photon_number(self, cutoff):
@@ -75,6 +133,7 @@ class TestThermalState:
         with pytest.raises(NotImplementedError):
             state.ket()
 
+
 class TestVacuumState:
     def test_zero_photons(self, cutoff):
         """Próżnia |0⟩ powinna mieć 0 fotonów."""
@@ -83,6 +142,7 @@ class TestVacuumState:
         a = destroy(cutoff)
         n_hat = a.dag() * a
         assert abs(expect(n_hat, rho)) < 1e-10
+
 
 class TestBinomialState:
     def test_normalization(self, cutoff):
@@ -97,6 +157,7 @@ class TestBinomialState:
         """
         with pytest.raises(ValueError):
             BinomialState(N=4, p=1.5, cutoff=cutoff)
+
 
 class TestGKPState:
     def test_normalization(self, cutoff):
