@@ -55,7 +55,7 @@ def test_common_mixed_state_properties(cutoff):
     assert abs(rho.tr() - 1) < 1e-10
     assert rho.isherm is True
     assert np.all(rho.eigenenergies() >= -1e-10)
-#     assert is_physical(rho) is True
+    assert is_physical(rho) is True
 
 
 class TestFockState:
