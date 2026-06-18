@@ -5,9 +5,10 @@ of quantum density matrices.
 """
 
 import numpy as np
+from qutip import Qobj
 
 
-def is_physical(rho) -> bool:
+def is_physical(rho: Qobj, atol: float = 1e-6) -> bool:
     """Check whether a quantum state is physically valid.
 
     A density matrix is considered physical if it satisfies:
@@ -18,6 +19,7 @@ def is_physical(rho) -> bool:
 
     Args:
         rho: Quantum object representing a density matrix.
+        atol: Absolute tolerance used when checking numerical precision errors.
 
     Returns:
         bool: True if the state is physically valid, False otherwise.
@@ -32,7 +34,7 @@ def is_physical(rho) -> bool:
 
     # Positive semi-definiteness check
     eigvals = rho.eigenenergies()
-    if np.any(eigvals < -1e-10):
+    if np.any(eigvals < -atol):
         return False
 
     return True
