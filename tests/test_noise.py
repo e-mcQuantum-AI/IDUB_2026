@@ -1,7 +1,16 @@
 import pytest
 from qutip import destroy, expect, qeye
 
-from src.physics import QuantumChannel, CoherentState, LossChannel, FockState, MixtureChannel, DephasingChannel, DepolarizingChannel
+from src.physics import (
+    QuantumChannel,
+    CoherentState,
+    LossChannel,
+    FockState,
+    MixtureChannel,
+    DephasingChannel,
+    DepolarizingChannel,
+    AmplificationChannel
+)
 from src.physics.validation import is_physical
 
 
@@ -151,3 +160,42 @@ class TestDepolarizingChannel:
             DepolarizingChannel(cutoff=cutoff, p=-0.1)
         with pytest.raises(ValueError):
             DepolarizingChannel(cutoff=cutoff, p=1.05)
+
+class TestAmplificationChannel:
+    def test_preserves_physicality(self, cutoff):
+        """After amplification, the state must remain physical (is_physical is True)."""
+        state = CoherentState(alpha=1.0, cutoff=cutoff)
+        channel = AmplificationChannel(cutoff=cutoff, gamma=0.1)
+        rho_out = channel.apply(state.density_matrix())
+        assert is_physical(rho_out)
+
+    def test_increases_photon_number(self, cutoff):
+        """Amplification channel must increase the mean photon number.
+
+        Amplification = photons are added to the system → ⟨n̂⟩_out > ⟨n̂⟩_in.
+        """
+        state = FockState(n=2, cutoff=cutoff)
+        rho_in = state.density_matrix()
+
+        channel = AmplificationChannel(cutoff=cutoff, gamma=0.2)
+        rho_out = channel.apply(rho_in)
+
+        a = destroy(cutoff)
+        n_hat = a.dag() * a
+
+        assert expect(n_hat, rho_out) > expect(n_hat, rho_in)
+
+    def test_zero_amplification_preserves_state(self, cutoff):
+        """With gamma=0, the channel acts as an identity operator (no changes)."""
+        state = CoherentState(alpha=1.0, cutoff=cutoff)
+        rho_in = state.density_matrix()
+
+        channel = AmplificationChannel(cutoff=cutoff, gamma=0.0)
+        rho_out = channel.apply(rho_in)
+
+        assert abs((rho_in - rho_out).norm()) < 1e-7
+
+    def test_invalid_gamma_raises(self, cutoff):
+        """Constructor must raise ValueError if gamma is negative."""
+        with pytest.raises(ValueError):
+            AmplificationChannel(cutoff=cutoff, gamma=-0.2)
