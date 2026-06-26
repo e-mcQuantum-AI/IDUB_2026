@@ -1,3 +1,4 @@
+[![Tests](https://github.com/e-mcQuantum-AI/IDUB_2026/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/e-mcQuantum-AI/IDUB_2026/actions/workflows/tests.yml)
 # IDUB_2026
 
 **Głębokie uczenie do klasyfikacji i rekonstrukcji kwantowych stanów optycznych**
