@@ -11,7 +11,8 @@ from src.physics import (
     DephasingChannel,
     DepolarizingChannel,
     AmplificationChannel,
-    GaussianNoiseChannel
+    GaussianNoiseChannel,
+    ThermalNoiseChannel
 )
 from src.physics.validation import is_physical
 
@@ -253,3 +254,43 @@ class TestGaussianNoiseChannel:
         """Constructor must raise ValueError if gamma is negative."""
         with pytest.raises(ValueError):
             GaussianNoiseChannel(cutoff=cutoff, gamma=-0.1)
+
+class TestThermalNoiseChannel:
+    def test_preserves_physicality(self, cutoff):
+        """After thermal noise is applied, the state must remain physical."""
+        state = CoherentState(alpha=1.0, cutoff=cutoff)
+        channel = ThermalNoiseChannel(cutoff=cutoff, gamma=0.1, n_th=0.5)
+        rho_out = channel.apply(state.density_matrix())
+        assert is_physical(rho_out)
+
+    def test_vacuum_absorbs_thermal_photons(self, cutoff):
+        """A vacuum state in a thermal bath must absorb energy (mean photon number increases)."""
+        state = FockState(n=0, cutoff=cutoff)
+        rho_in = state.density_matrix()
+
+        channel = ThermalNoiseChannel(cutoff=cutoff, gamma=0.3, n_th=1.5)
+        rho_out = channel.apply(rho_in)
+
+        a = destroy(cutoff)
+        n_hat = a.dag() * a
+
+        assert expect(n_hat, rho_in) == 0.0
+        assert expect(n_hat, rho_out) > 0.0
+        assert expect(n_hat, rho_out) < 1.5
+
+    def test_zero_gamma_preserves_state(self, cutoff):
+        """With gamma=0, the channel must act as an identity operator regardless of n_th."""
+        state = CoherentState(alpha=1.5, cutoff=cutoff)
+        rho_in = state.density_matrix()
+
+        channel = ThermalNoiseChannel(cutoff=cutoff, gamma=0.0, n_th=2.0)
+        rho_out = channel.apply(rho_in)
+
+        assert abs((rho_in - rho_out).norm()) < 1e-7
+
+    def test_invalid_parameters_raise(self, cutoff):
+        """Constructor must raise ValueError if gamma or n_th is negative."""
+        with pytest.raises(ValueError):
+            ThermalNoiseChannel(cutoff=cutoff, gamma=-0.1, n_th=0.5)
+        with pytest.raises(ValueError):
+            ThermalNoiseChannel(cutoff=cutoff, gamma=0.2, n_th=-0.5)

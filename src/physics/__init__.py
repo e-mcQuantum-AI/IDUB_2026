@@ -12,6 +12,7 @@ from .noise.dephasing import DephasingChannel
 from .noise.depolarizing import DepolarizingChannel
 from .noise.amplification import AmplificationChannel
 from .noise.gaussian import GaussianNoiseChannel
+from .noise.thermal_noise import ThermalNoiseChannel
 from .measurement.wigner import WignerMeasurement
 from .measurement.pipeline import MeasurementPipeline
 from .config import GeneratorConfig
