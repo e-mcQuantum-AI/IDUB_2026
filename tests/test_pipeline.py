@@ -1,21 +1,17 @@
 import pytest
 import numpy as np
-from qutip import destroy, expect, Qobj
+from qutip import destroy, expect
 
 from src.physics import (
-    # Stany (7)
     VacuumState, FockState, CoherentState, CatState,
     GKPState, BinomialState, ThermalState,
 
-    # Kanały szumu (7)
     LossChannel, DephasingChannel, DepolarizingChannel,
     AmplificationChannel, GaussianNoiseChannel,
     ThermalNoiseChannel, MixtureChannel,
 
-    # Pomiary (2)
     WignerMeasurement, HusimiMeasurement,
 
-    # Potok
     MeasurementPipeline
 )
 from src.physics.validation import is_physical
@@ -55,9 +51,6 @@ class TestMeasurementPipeline:
         """Bezpieczny, ale szybki wymiar przestrzeni dla 98 symulacji."""
         return 12
 
-    # =====================================================================
-    # 1. TEST MATRYCOWY: 98 KOMBINACJI (7 x 7 x 2)
-    # =====================================================================
     @pytest.mark.parametrize("state_name", STATES.keys())
     @pytest.mark.parametrize("channel_name", CHANNELS.keys())
     @pytest.mark.parametrize("meas_name", MEASUREMENTS.keys())
@@ -84,9 +77,6 @@ class TestMeasurementPipeline:
         if meas_name == "Husimi":
             assert np.all(result_2d >= -1e-13), f"Husimi Q < 0 dla {state_name} po {channel_name}!"
 
-    # =====================================================================
-    # 2. TESTY SPECYFICZNYCH CECH FIZYCZNYCH Z CHECKLISTY
-    # =====================================================================
     def test_loss_reduces_photons(self, fast_cutoff):
         """Test kanałów szumu: Redukcja fotonów (straty)."""
         state = FockState(n=3, cutoff=fast_cutoff)
@@ -124,9 +114,6 @@ class TestMeasurementPipeline:
 
         assert abs(integral - 1.0) < 1e-3
 
-    # =====================================================================
-    # 3. TESTY Z ZACHOWANIEM STAREJ FUNKCJONALNOŚCI
-    # =====================================================================
     def test_noisy_vs_clean_difference(self, fast_cutoff):
         """Pipeline z szumem powinien widocznie zmienić obraz względem czystego."""
         state = FockState(n=2, cutoff=fast_cutoff)
