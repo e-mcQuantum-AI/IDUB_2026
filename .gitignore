@@ -23,3 +23,5 @@ data/*
 *.fdb_latexmk
 *.synctex.gz
 *.tmp.*
+# Annoying
+.idea/IDUB_2026.iml

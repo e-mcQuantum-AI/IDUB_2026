@@ -1,7 +1,7 @@
 import pytest
 from qutip import destroy, expect
-from src.physics.noise.base import QuantumChannel
-from src.physics import CoherentState, LossChannel, FockState, MixtureChannel
+
+from src.physics import QuantumChannel, CoherentState, LossChannel, FockState, MixtureChannel, DephasingChannel
 from src.physics.validation import is_physical
 
 
@@ -86,3 +86,54 @@ class TestMixtureChannel:
             MixtureChannel(p=1.2, rho_other=s2)
         with pytest.raises(ValueError):
             MixtureChannel(p=-0.5, rho_other=s2)
+
+class TestDephasingChannel:
+    def test_preserves_physicality(self, cutoff):
+        """Po defazowaniu stan nadal musi być w pełni fizyczny."""
+        state = CoherentState(alpha=1.5, cutoff=cutoff)
+        channel = DephasingChannel(cutoff=cutoff, gamma=0.2)
+        rho_out = channel.apply(state.density_matrix())
+        assert is_physical(rho_out)
+
+    def test_conserves_photon_number(self, cutoff):
+        """Kluczowa cecha: defazowanie NIE zmienia średniej liczby fotonów!
+
+        W przeciwieństwie do LossChannel, ewolucja pod operatorem n̂
+        zmienia fazy, ale zachowuje rozkład prawdopodobieństwa obsadzeń.
+        """
+        state = CoherentState(alpha=2.0, cutoff=cutoff)
+        rho_in = state.density_matrix()
+
+        channel = DephasingChannel(cutoff=cutoff, gamma=0.5)
+        rho_out = channel.apply(rho_in)
+
+        a = destroy(cutoff)
+        n_hat = a.dag() * a
+
+        assert abs(expect(n_hat, rho_in) - expect(n_hat, rho_out)) < 1e-7
+
+    def test_fock_state_is_invariant(self, cutoff):
+        """Stan Focka |n⟩ jest stanem własnym n̂, więc defazowanie go nie zmienia."""
+        state = FockState(n=3, cutoff=cutoff)
+        rho_in = state.density_matrix()
+
+        channel = DephasingChannel(cutoff=cutoff, gamma=0.8)
+        rho_out = channel.apply(rho_in)
+
+        # Różnica norm powinna być bliska zeru
+        assert abs((rho_in - rho_out).norm()) < 1e-7
+
+    def test_zero_dephasing_preserves_state(self, cutoff):
+        """Dla gamma=0 kanał jest identycznością (brak zmian w stanie)."""
+        state = CoherentState(alpha=1.5, cutoff=cutoff)
+        rho_in = state.density_matrix()
+
+        channel = DephasingChannel(cutoff=cutoff, gamma=0.0)
+        rho_out = channel.apply(rho_in)
+
+        assert abs((rho_in - rho_out).norm()) < 1e-7
+
+    def test_invalid_gamma_raises(self, cutoff):
+        """Konstruktor powinien odrzucić ujemną wartość parametru gamma."""
+        with pytest.raises(ValueError):
+            DephasingChannel(cutoff=cutoff, gamma=-0.5)

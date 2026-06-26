@@ -5,8 +5,10 @@ from .state.vacuum import VacuumState
 from .state.thermal import ThermalState
 from .state.gkp import GKPState
 from .state.binomial import BinomialState
+from .noise.base import QuantumChannel
 from .noise.loss import LossChannel
 from .noise.mixture import MixtureChannel
+from .noise.dephasing import DephasingChannel
 from .measurement.wigner import WignerMeasurement
 from .measurement.pipeline import MeasurementPipeline
 from .config import GeneratorConfig
