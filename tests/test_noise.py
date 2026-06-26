@@ -1,7 +1,7 @@
 import pytest
-from qutip import destroy, expect
+from qutip import destroy, expect, qeye
 
-from src.physics import QuantumChannel, CoherentState, LossChannel, FockState, MixtureChannel, DephasingChannel
+from src.physics import QuantumChannel, CoherentState, LossChannel, FockState, MixtureChannel, DephasingChannel, DepolarizingChannel
 from src.physics.validation import is_physical
 
 
@@ -87,53 +87,67 @@ class TestMixtureChannel:
         with pytest.raises(ValueError):
             MixtureChannel(p=-0.5, rho_other=s2)
 
+
 class TestDephasingChannel:
     def test_preserves_physicality(self, cutoff):
-        """Po defazowaniu stan nadal musi być w pełni fizyczny."""
+        """After dephasing, the state must remain physical (is_physical is True)."""
         state = CoherentState(alpha=1.5, cutoff=cutoff)
         channel = DephasingChannel(cutoff=cutoff, gamma=0.2)
         rho_out = channel.apply(state.density_matrix())
         assert is_physical(rho_out)
 
     def test_conserves_photon_number(self, cutoff):
-        """Kluczowa cecha: defazowanie NIE zmienia średniej liczby fotonów!
-
-        W przeciwieństwie do LossChannel, ewolucja pod operatorem n̂
-        zmienia fazy, ale zachowuje rozkład prawdopodobieństwa obsadzeń.
-        """
+        """Dephasing must conserve the mean photon number, as [n̂, n̂] = 0."""
         state = CoherentState(alpha=2.0, cutoff=cutoff)
         rho_in = state.density_matrix()
-
         channel = DephasingChannel(cutoff=cutoff, gamma=0.5)
         rho_out = channel.apply(rho_in)
 
         a = destroy(cutoff)
         n_hat = a.dag() * a
-
         assert abs(expect(n_hat, rho_in) - expect(n_hat, rho_out)) < 1e-7
 
     def test_fock_state_is_invariant(self, cutoff):
-        """Stan Focka |n⟩ jest stanem własnym n̂, więc defazowanie go nie zmienia."""
+        """Fock states are eigenstates of n̂, so they are invariant under dephasing."""
         state = FockState(n=3, cutoff=cutoff)
         rho_in = state.density_matrix()
-
         channel = DephasingChannel(cutoff=cutoff, gamma=0.8)
         rho_out = channel.apply(rho_in)
-
-        # Różnica norm powinna być bliska zeru
-        assert abs((rho_in - rho_out).norm()) < 1e-7
-
-    def test_zero_dephasing_preserves_state(self, cutoff):
-        """Dla gamma=0 kanał jest identycznością (brak zmian w stanie)."""
-        state = CoherentState(alpha=1.5, cutoff=cutoff)
-        rho_in = state.density_matrix()
-
-        channel = DephasingChannel(cutoff=cutoff, gamma=0.0)
-        rho_out = channel.apply(rho_in)
-
         assert abs((rho_in - rho_out).norm()) < 1e-7
 
     def test_invalid_gamma_raises(self, cutoff):
-        """Konstruktor powinien odrzucić ujemną wartość parametru gamma."""
+        """Constructor must raise ValueError if gamma is negative."""
         with pytest.raises(ValueError):
             DephasingChannel(cutoff=cutoff, gamma=-0.5)
+
+class TestDepolarizingChannel:
+    def test_preserves_physicality(self, cutoff):
+        """After depolarization, the state must remain physical (is_physical is True)."""
+        state = CoherentState(alpha=1.0, cutoff=cutoff)
+        channel = DepolarizingChannel(cutoff=cutoff, p=0.3)
+        rho_out = channel.apply(state.density_matrix())
+        assert is_physical(rho_out)
+
+    def test_p_zero_is_identity(self, cutoff):
+        """With p=0, the channel must return the original state unchanged."""
+        state = FockState(n=2, cutoff=cutoff)
+        rho_in = state.density_matrix()
+        channel = DepolarizingChannel(cutoff=cutoff, p=0.0)
+        rho_out = channel.apply(rho_in)
+        assert abs((rho_in - rho_out).norm()) < 1e-10
+
+    def test_p_one_is_maximally_mixed(self, cutoff):
+        """With p=1, the channel must return the maximally mixed state I/d."""
+        state = CoherentState(alpha=2.0, cutoff=cutoff)
+        channel = DepolarizingChannel(cutoff=cutoff, p=1.0)
+        rho_out = channel.apply(state.density_matrix())
+
+        expected_identity = qeye(cutoff) / cutoff
+        assert abs((rho_out - expected_identity).norm()) < 1e-10
+
+    def test_invalid_p_raises(self, cutoff):
+        """Constructor must raise ValueError if probability p is out of bounds."""
+        with pytest.raises(ValueError):
+            DepolarizingChannel(cutoff=cutoff, p=-0.1)
+        with pytest.raises(ValueError):
+            DepolarizingChannel(cutoff=cutoff, p=1.05)

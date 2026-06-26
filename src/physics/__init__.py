@@ -9,6 +9,7 @@ from .noise.base import QuantumChannel
 from .noise.loss import LossChannel
 from .noise.mixture import MixtureChannel
 from .noise.dephasing import DephasingChannel
+from .noise.depolarizing import DepolarizingChannel
 from .measurement.wigner import WignerMeasurement
 from .measurement.pipeline import MeasurementPipeline
 from .config import GeneratorConfig
