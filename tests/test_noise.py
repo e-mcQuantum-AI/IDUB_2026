@@ -1,3 +1,4 @@
+import numpy as np
 import pytest
 from qutip import destroy, expect, qeye
 
@@ -9,7 +10,8 @@ from src.physics import (
     MixtureChannel,
     DephasingChannel,
     DepolarizingChannel,
-    AmplificationChannel
+    AmplificationChannel,
+    GaussianNoiseChannel
 )
 from src.physics.validation import is_physical
 
@@ -199,3 +201,55 @@ class TestAmplificationChannel:
         """Constructor must raise ValueError if gamma is negative."""
         with pytest.raises(ValueError):
             AmplificationChannel(cutoff=cutoff, gamma=-0.2)
+
+class TestGaussianNoiseChannel:
+    def test_preserves_physicality(self, cutoff):
+        """After Gaussian noise is added, the state must remain physical."""
+        state = CoherentState(alpha=1.0, cutoff=cutoff)
+        channel = GaussianNoiseChannel(cutoff=cutoff, gamma=0.1)
+        rho_out = channel.apply(state.density_matrix())
+        assert is_physical(rho_out)
+
+    def test_increases_quadrature_variance(self, cutoff):
+        """Gaussian noise channel must increase the variance of quadratures X and P."""
+        state = FockState(n=0, cutoff=cutoff)
+        rho_in = state.density_matrix()
+
+        channel = GaussianNoiseChannel(cutoff=cutoff, gamma=0.1)
+        rho_out = channel.apply(rho_in)
+
+        a = destroy(cutoff)
+        X = (a + a.dag()) / np.sqrt(2)
+
+        var_x_in = expect(X ** 2, rho_in)
+        var_x_out = expect(X ** 2, rho_out)
+
+        assert var_x_out > var_x_in
+
+    def test_adds_energy_to_system(self, cutoff):
+        """Symmetric quadrature noise acts as heating, increasing the mean photon number."""
+        state = CoherentState(alpha=1.5, cutoff=cutoff)
+        rho_in = state.density_matrix()
+
+        channel = GaussianNoiseChannel(cutoff=cutoff, gamma=0.15)
+        rho_out = channel.apply(rho_in)
+
+        a = destroy(cutoff)
+        n_hat = a.dag() * a
+
+        assert expect(n_hat, rho_out) > expect(n_hat, rho_in)
+
+    def test_zero_noise_preserves_state(self, cutoff):
+        """With gamma=0, the channel must act as an identity operator."""
+        state = CoherentState(alpha=1.0, cutoff=cutoff)
+        rho_in = state.density_matrix()
+
+        channel = GaussianNoiseChannel(cutoff=cutoff, gamma=0.0)
+        rho_out = channel.apply(rho_in)
+
+        assert abs((rho_in - rho_out).norm()) < 1e-7
+
+    def test_invalid_gamma_raises(self, cutoff):
+        """Constructor must raise ValueError if gamma is negative."""
+        with pytest.raises(ValueError):
+            GaussianNoiseChannel(cutoff=cutoff, gamma=-0.1)
